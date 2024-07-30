@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: #ffffff;
+        }
+
+        .sidebar {
+            width: 60px;
+            background-color: #F1F1F1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            background-color: #8EF913;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header input[type="text"] {
+            width: 60%;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile p {
+            margin-right: 10px;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            background-color: #ccc;
+            border-radius: 50%;
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            margin-top: 20px;
+        }
+
+        .main-section {
+            flex: 2;
+            margin-right: 20px;
+        }
+
+        .stats-section {
+            width: 500px;
+        }
+
+        .greeting {
+            margin: 20px 0;
+        }
+
+        .activities, .emissions-saved{
+            background-color: #F1F1F1;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stats {
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            
+        }
+
+        .activities h2, .emissions-saved h2, .stats h2 {
+            margin-bottom: 10px;
+        }
+
+        .activity-card {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .user-pic {
+            width: 40px;
+            height: 40px;
+            background-color: #ccc;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .activity-card p {
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background-color: #000;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        .chart {
+            height: 200px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid div {
+            text-align: center;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 10px;
+        }
+
+        .plans {
+            margin-bottom: 10px;
+        }
+
+        .plan-card {
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="icon"></div>
+        <div class="icon"></div>
+        <div class="icon"></div>
+        <div class="icon"></div>
+    </div>
+    <div class="main-content">
+        <header>
+            <input type="text" placeholder="Search activities, goals, and tips">
+            <div class="profile">
+                <div style="margin-right: 10px;" class="profile-pic"></div>
+                <p>Welcome to</p>
+            </div>
+        </header>
+        <div class="content">
+            <div class="main-section">
+                <div class="greeting" style="margin-bottom: 45px;">
+                    <h1 style="margin-bottom: 10px; font-size: 25px;">Good day, User</h1>
+                    <p>Explore your progress and eco-footprint for a sustainable future.</p>
+                </div>
+                <h2 style="margin-bottom: 17px; font-size: 20px;">My activities</h2>
+                <div class="activities">
+                    <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight:300;">Earned points: 50</h3>
+                    <div class="activity-card">
+                        <div class="user-pic"></div>
+                        <p>User</p>
+                        <p>Biking to work</p>
+                        <p>Reduce emissions</p>
+                    </div>
+                    <div class="activity-card">
+                        <div class="user-pic"></div>
+                        <p>User</p>
+                        <p>Solar panel installation</p>
+                        <p>Eco-friendly initiative</p>
+                    </div>
+                    <div class="activity-card">
+                        <div class="user-pic"></div>
+                        <p>User</p>
+                        <p>Community cleanup</p>
+                        <p>Reduce emissions</p>
+                    </div>
+                    <button>All activities</button>
+                </div>
+                <div class="emissions-saved">
+                    <h2 style="margin-bottom: 17px; font-size: 20px;">Total emissions saved</h2>
+                    <div class="chart"></div>
+                </div>
+            </div>
+            <div class="stats-section">
+                <div class="stats">
+                    <h2>Today's Stats</h2>
+                    <div class="stats-grid">
+                        <div>Mon</div>
+                        <div>Tue</div>
+                        <div>Wed</div>
+                        <div>Thu</div>
+                        <div>Fri</div>
+                        <div>Sat</div>
+                        <div>Sun</div>
+                    </div>
+                    <div class="plans">
+                        <h3>Future plans</h3>
+                        <div class="plan-card">
+                            
+                            <div style="display: flex; align-items: center;">
+                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
+                                    2
+                                </div>
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <p>2-2-24</p>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card">
+                            
+                            <div style="display: flex; align-items: center;">
+                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
+                                    2
+                                </div>
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <p>2-2-24</p>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card">
+                            
+                            <div style="display: flex; align-items: center;">
+                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
+                                    2
+                                </div>
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <p>2-2-24</p>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card">
+                            
+                            <div style="display: flex; align-items: center;">
+                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
+                                    2
+                                </div>
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <p>2-2-24</p>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card">
+                            
+                            <div style="display: flex; align-items: center;">
+                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
+                                    2
+                                </div>
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <p>2-2-24</p>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                    </div>
+                    <button style="background-color: #8EF913; width: 100%;">Full schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

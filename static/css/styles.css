@@ -1,0 +1,142 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+.container, .profile-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+h1 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+form label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="button"] {
+    background-color: #000;
+    color: white;
+    margin-right: 10px;
+}
+
+button[type="submit"] {
+    background-color: #00c900;
+    color: white;
+}
+
+.activities, .stats, .future-plans {
+    margin-bottom: 20px;
+}
+
+.activities .activity-list div, .future-plans ul li {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stats canvas {
+    width: 100%;
+    max-width: 100%;
+}
+
+.profile-container header {
+    text-align: center;
+    background-color: #00c900;
+    color: white;
+    padding: 20px;
+    border-radius: 10px 10px 0 0;
+}
+
+.profile-container header h1 {
+    margin: 0;
+}
+
+.details button, .gallery img {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #00c900;
+    color: white;
+    text-align: center;
+    border: none;
+    border-radius: 5px;
+}
+
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.gallery img {
+    width: calc(33.333% - 20px);
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.updates .update {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+header, .stats, .future-plans {
+    text-align: center;
+}
+
+header p {
+    color: #666;
+    margin-top: -10px;
+}
+
+.future-plans ul {
+    list-style: none;
+    padding: 0;
+}
+
+.future-plans ul li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.future-plans ul li:last-child {
+    border-bottom: none;
+}
