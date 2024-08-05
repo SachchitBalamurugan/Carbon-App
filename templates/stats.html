@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    background-color: #ffffff;
+}
+
+.sidebar {
+            width: 60px;
+            background-color: #F1F1F1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+        .icon {
+            width: 50px;
+            height: 70px;
+            color: #030303;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .icon:hover {
+            background-color: #8EF913;
+            border-radius: 5px;
+        }
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header input[type="text"] {
+    width: 60%;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+}
+
+.profile p {
+    margin-right: 10px;
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    background-color: #ccc;
+    border-radius: 50%;
+}
+
+.content {
+    display: flex;
+    flex: 1;
+    margin-top: 20px;
+}
+
+.main-section {
+    flex: 2;
+    margin-right: 20px;
+}
+
+.stats-section {
+    width: 500px;
+}
+
+.greeting {
+    margin: 20px 0;
+}
+
+.activities, .emissions-saved{
+    background-color: #F1F1F1;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.activities2{
+    background-color: #E8F9D4;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.stats {
+    background-color: #F1F1F1;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+}
+
+.activities2 .activities h2, .emissions-saved h2, .stats h2 {
+    margin-bottom: 10px;
+}
+
+.activity-card {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.user-pic {
+    width: 40px;
+    height: 40px;
+    background-color: #ccc;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.activity-card p {
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #333;
+}
+
+.chart {
+    height: 200px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.stats-grid div {
+    text-align: center;
+    padding: 10px;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+
+.plans {
+    margin-bottom: 10px;
+}
+
+.plan-card {
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+    .main-content {
+        padding: 10px;
+    }
+    
+    header input[type="text"] {
+        width: 50%;
+    }
+
+    .stats-section {
+        width: 300px;
+    }
+}
+
+@media (max-width: 992px) {
+    body {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+    
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header input[type="text"] {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .content {
+        flex-direction: column;
+    }
+
+    .main-section {
+        margin-right: 0;
+    }
+
+    .stats-section {
+        width: 100%;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        padding: 10px 0;
+    }
+
+    .icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .profile-pic {
+        width: 30px;
+        height: 30px;
+    }
+
+    button {
+        padding: 8px 16px;
+        border-radius: 15px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="/" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
+        <a href="/dashboard" class="icon"><i class="fa-solid fa-share-nodes fa-xl"></i></a>
+        <a href="/profile" class="icon"><i class="fa-solid fa-user-group fa-xl"></i></a>
+        <a href="/settings" class="icon"><i class="fa-solid fa-calendar fa-xl"></i></a>
+        <a href="/statistics" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
+    </div>
+    
+    <div class="main-content">
+        <header>
+            <input type="text" placeholder="Search activities, goals, and tips">
+            <div class="profile">
+                <div style="margin-right: 10px;" class="profile-pic"></div>
+                <p>Welcome to</p>
+            </div>
+        </header>
+        <div class="content">
+            <div class="main-section">
+                <div class="greeting" style="margin-bottom: 45px;">
+                    <h1 style="margin-bottom: 10px; font-size: 25px;">Carbon Tracker Dashboard</h1>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px;">
+                    <div class="activities" style="flex: 1;">
+                        <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">9% decrease in</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3>
+                    </div>
+                    <div class="activities" style="flex: 1;">
+                        <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total CO2 emissions saved</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">$1.432 equivalent</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3>
+                    </div>
+                </div>
+                 <!-- Chart -->
+                 <div style="position: relative; width: 100%; height: 300px; background-color: white; ">
+
+                    <!-- Grid lines and numbers -->
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; display: flex; flex-direction: column; justify-content: space-between; z-index: 0; ">
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">8</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">6</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">4</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">2</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">0</span></div>
+                    </div>
+                  
+                    <!-- Bars -->
+                    <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 100%; width: 100%; position: relative; z-index: 1; margin-top: 30px; ">
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 30px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 30px; border-radius: 15px 15px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 30px; border-radius:  0 0 15px 15px;"></div>
+                          
+                        </div>
+                        <span style="margin-top: 2px; font-size: clamp(0.7rem, 1vw, 2.5rem); margin-left: 10px;
+">Finance</span>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 30px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 30px; border-radius: 15px 15px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 30px; border-radius:  0 0 15px 15px;"></div>
+                          
+                        </div>
+                        <span style="margin-top:2px; font-size: clamp(0.7rem, 1vw, 2.5rem);
+">HR</span>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 30px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 30px; border-radius: 15px 15px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 30px; border-radius:  0 0 15px 15px;"></div>
+                          
+                        </div>
+                        <span style="margin-top: 2px; font-size: clamp(0.7rem, 1vw, 2.5rem);
+">IT</span>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 30px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 30px; border-radius: 15px 15px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 30px; border-radius:  0 0 15px 15px;"></div>
+                          
+                        </div>
+                        <span style="margin-top: 2px; font-size: clamp(0.7rem, 1vw, 2.5rem);
+">Marketing</span>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 30px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 30px; border-radius: 15px 15px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 30px; border-radius:  0 0 15px 15px;"></div>
+                          
+                        </div>
+                        <span style="margin-top: 2px; font-size: clamp(0.7rem, 1vw, 2.5rem);
+">Design</span>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 30px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 30px; border-radius: 15px 15px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 30px; border-radius:  0 0 15px 15px;"></div>
+                          
+                        </div>
+                        <span style="margin-top: 2px; font-size: clamp(0.7rem, 1vw, 2.5rem);
+">Management</span>
+                      </div>
+                    </div>
+                  
+                  </div>
+                  
+                  
+                  <div class="greeting" style="margin-bottom: 45px; margin-top: 80px;">
+                    <h1 style="margin-bottom: 10px; font-size: 25px; margin-top: 20px;">Total CO2 Reduction Expenses</h1>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px;">
+                    <div class="activities" style="flex: 1;">
+                        <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total carbon offset</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">$31494.21 invested in</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3>
+                    </div>
+                    <div class="activities" style="flex: 1;">
+                        <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total carbon offset bonuses</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">$45291.01 invested in</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div style="position: relative; width: 100%; height: 300px; background-color: white; ">
+
+                    <!-- Grid lines and numbers -->
+                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; display: flex; flex-direction: column; justify-content: space-between; z-index: 0; ">
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">8</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">6</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">4</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">2</span></div>
+                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">0</span></div>
+                    </div>
+                  
+                    <!-- Bars -->
+                    <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 100%; width: 100%; position: relative; z-index: 1; margin-top: 30px; ">
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 80px; border-radius: 45px 45px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 80px; border-radius:  0 0 45px 45px;"></div>
+                          
+                        </div>
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                            <span style="margin-top: 2px; flex: 1; text-align: center; margin-left: 10px;">Training effectiveness on carbon reduction</span>
+                        </div>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 80px; border-radius: 45px 45px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 80px; border-radius:  0 0 45px 45px;"></div>
+                          
+                        </div>
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                            <span style="margin-top: 2px; flex: 1; text-align: center;">Satisfaction with eco-friendly practices</span>
+                        </div>
+                      </div>
+                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
+                        <div style="position: relative; height: 100%; width: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="background-color: #E8F9D4; height: 250px; width: 80px; border-radius: 45px 45px 0 0;"></div>
+                          <div style="background-color: #8EF913; height: 50px; width: 80px; border-radius:  0 0 45px 45px;"></div>
+                          
+                        </div>
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%; ">
+                            <span style="margin-top: 2px; flex: 1; text-align: center;">Engagement with sustainable living</span>
+                        </div>
+                      </div>
+                      
+                     
+                    </div>
+                    <div style="width: 100%; height: 100px; background-color: white;"></div>
+
+                  
+                  </div>
+                  
+            </div>
+            <div class="stats-section">
+                <div class="stats">
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">Community</h2>
+                        <button style="margin-left: auto;">View today's announcements</button>
+                    </div>   
+                                     
+                    <div class="plans">
+                        
+                        <div class="plan-card" style="background-color: #8EF913;">
+                            
+                            <div style="display: flex; align-items: center;">
+                                
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Discover eco-friendly events near you</p>
+                                    <p style="color: #030303; margin-top: 25px;">Posted 5 mins ago</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <i class="fa-solid fa-thumbtack" style="color: #000000; margin-right: 10px;"></i>
+                                    <i class="fa-solid fa-ellipsis" style="color: #000000;"></i>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card" style="background-color: #8EF913;">
+                            
+                            <div style="display: flex; align-items: center;">
+                                
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Discover eco-friendly events near you</p>
+                                    <p style="color: #030303; margin-top: 25px;">Posted 5 mins ago</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <i class="fa-solid fa-thumbtack" style="color: #000000; margin-right: 10px;"></i>
+                                    <i class="fa-solid fa-ellipsis" style="color: #000000;"></i>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card" style="background-color: #8EF913;">
+                            
+                            <div style="display: flex; align-items: center;">
+                                
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Discover eco-friendly events near you</p>
+                                    <p style="color: #030303; margin-top: 25px;">Posted 5 mins ago</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <i class="fa-solid fa-thumbtack" style="color: #000000; margin-right: 10px;"></i>
+                                    <i class="fa-solid fa-ellipsis" style="color: #000000;"></i>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card" style="background-color: #8EF913;">
+                            
+                            <div style="display: flex; align-items: center;">
+                                
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Discover eco-friendly events near you</p>
+                                    <p style="color: #030303; margin-top: 25px;">Posted 5 mins ago</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <i class="fa-solid fa-thumbtack" style="color: #000000; margin-right: 10px;"></i>
+                                    <i class="fa-solid fa-ellipsis" style="color: #000000;"></i>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                        <div class="plan-card" style="background-color: #8EF913;">
+                            
+                            <div style="display: flex; align-items: center;">
+                                
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Discover eco-friendly events near you</p>
+                                    <p style="color: #030303; margin-top: 25px;">Posted 5 mins ago</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <i class="fa-solid fa-thumbtack" style="color: #000000; margin-right: 10px;"></i>
+                                    <i class="fa-solid fa-ellipsis" style="color: #000000;"></i>
+                                </div>
+                            </div>
+                    
+                            
+                        </div>
+                    </div>
+                    <button style="background-color: #000000; width: 100%;">View all announcements</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 20px;">
+                    <div class="activities2" style="flex: 1;">
+                        <div>
+                            <h3 style="margin-bottom: 17px; font-size: 20px; color: #333333; font-weight: 300;">Recent Eco-Activities</h3>
+                            <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">10:40 AM, Fri., Sept. 10, 2021</h3>
+                            <h3 style="margin-bottom: 17px; font-size: 17px; color: #5D5D5B; font-weight: 300;">You planted a tree in a local park</h3>
+                            <h3 style="margin-bottom: 17px; font-size: 17px; color: #5D5D5B; font-weight: 300;">Check the tree's growth progress and contribution to the environment.</h3>
+                        </div>
+                        <div>
+                            <h3 style="margin-bottom: 17px; font-size: 20px; color: #333333; font-weight: 300;">Recent Eco-Activities</h3>
+                            <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">10:40 AM, Fri., Sept. 10, 2021</h3>
+                            <h3 style="margin-bottom: 17px; font-size: 17px; color: #5D5D5B; font-weight: 300;">You planted a tree in a local park</h3>
+                            <h3 style="margin-bottom: 17px; font-size: 17px; color: #5D5D5B; font-weight: 300;">Check the tree's growth progress and contribution to the environment.</h3>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <h3 style="font-size: 15px; color: #5D5D5B; font-weight: 300; margin-right: 10px;">
+                                Today you saved 12kg of CO2 emissions
+                            </h3>
+                            <button style="background-color: #8EF913; font-size: 16px; font-weight: bold;">View all eco-tasks</button>
+                        </div>                        
+                    </div>          
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

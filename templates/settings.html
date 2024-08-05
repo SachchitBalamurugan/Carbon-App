@@ -27,13 +27,18 @@
             align-items: center;
             padding: 20px 0;
         }
-
         .icon {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 70px;
+            color: #030303;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .icon:hover {
             background-color: #8EF913;
-            margin: 20px 0;
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
         .main-content {
@@ -199,10 +204,11 @@
 </head>
 <body>
     <div class="sidebar">
-        <div class="icon"></div>
-        <div class="icon"></div>
-        <div class="icon"></div>
-        <div class="icon"></div>
+        <a href="/" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
+        <a href="/dashboard" class="icon"><i class="fa-solid fa-share-nodes fa-xl"></i></a>
+        <a href="/profile" class="icon"><i class="fa-solid fa-user-group fa-xl"></i></a>
+        <a href="/settings" class="icon"><i class="fa-solid fa-calendar fa-xl"></i></a>
+        <a href="/statistics" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
     </div>
     <div class="main-content">
         <div class="content">
