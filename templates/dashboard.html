@@ -176,6 +176,74 @@
             border-radius: 10px;
             margin-bottom: 10px;
         }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-content label {
+            margin: 10px 0 5px;
+        }
+
+        .modal-content select,
+        .modal-content input {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-content button {
+            background-color: #8EF913;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .modal-content button:hover {
+            background-color: #79D110;
+        }
     </style>
 </head>
 <body>
@@ -202,32 +270,19 @@
                 </div>
                 <h2 style="margin-bottom: 17px; font-size: 20px;">My activities</h2>
                 <div class="activities">
-                    <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight:300;">Earned points: 50</h3>
-                    <div class="activity-card">
-                        <div class="user-pic"></div>
-                        <p>User</p>
-                        <p>Biking to work</p>
-                        <p>Reduce emissions</p>
-                    </div>
-                    <div class="activity-card">
-                        <div class="user-pic"></div>
-                        <p>User</p>
-                        <p>Solar panel installation</p>
-                        <p>Eco-friendly initiative</p>
-                    </div>
-                    <div class="activity-card">
-                        <div class="user-pic"></div>
-                        <p>User</p>
-                        <p>Community cleanup</p>
-                        <p>Reduce emissions</p>
+                    <h3 id="earned-points" style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight:300;">Earned points: 50</h3>
+                    <div id="activity-list">
+                        
                     </div>
                     <button>All activities</button>
+                    <button id="add-activity-btn">Add activity</button>
                 </div>
                 <div class="emissions-saved">
                     <h2 style="margin-bottom: 17px; font-size: 20px;">Total emissions saved</h2>
                     <div class="chart"></div>
                 </div>
             </div>
+
             <div class="stats-section">
                 <div class="stats">
                     <h2>Today's Stats</h2>
@@ -328,10 +383,81 @@
                             
                         </div>
                     </div>
-                    <button style="background-color: #8EF913; width: 100%;">Full schedule</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- The Modal -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Activity</h2>
+            <form id="activityForm">
+                <label for="activity">Select Activity:</label>
+                <select id="activity" name="activity">
+                    <option value="Biking to work">Biking to work</option>
+                    <option value="Solar panel installation">Solar panel installation</option>
+                    <option value="Community cleanup">Community cleanup</option>
+                    <!-- Add more options as needed -->
+                </select>
+
+                <label for="duration">Duration (hours):</label>
+                <input type="number" id="duration" name="duration" min="0.1" step="0.1" required>
+
+                <button type="submit">Add Activity</button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // Get modal element
+        var modal = document.getElementById("activityModal");
+        // Get button that opens the modal
+        var btn = document.getElementById("add-activity-btn");
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Add form submit functionality (you can handle the actual logic here)
+        document.getElementById("activityForm").onsubmit = function(event) {
+            event.preventDefault();
+            var activity = document.getElementById("activity").value;
+            var duration = document.getElementById("duration").value;
+
+            // Update the activity list with the new activity
+            var activityList = document.getElementById("activity-list");
+            var newActivityCard = document.createElement("div");
+            newActivityCard.className = "activity-card";
+            newActivityCard.innerHTML = `
+                <div class="user-pic"></div>
+                <p>User</p>
+                <p>${activity}</p>
+                <p>Activity Duration: ${duration} hours</p>
+            `;
+            activityList.appendChild(newActivityCard);
+
+            // Close the modal after submission
+            modal.style.display = "none";
+        };
+
+    </script>
 </body>
 </html>
