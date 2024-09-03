@@ -244,9 +244,50 @@
         .update p {
             margin-right: 10px;
         }
+
+        .sidebar {
+    position: fixed; /* Make the sidebar fixed */
+    top: 0; /* Align it with the top of the screen */
+    left: 0; /* Align it with the left side of the screen */
+    height: 100%; /* Make the sidebar take up the full height of the screen */
+    width: 60px; /* Set the width of the sidebar */
+    background-color: #F1F1F1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Add a slight shadow for depth */
+}
+
+.profile-container {
+    margin-left: 30px; /* Add left margin to accommodate the sidebar */
+    width: calc(100% - 80px); /* Adjust width considering the sidebar */
+}
+
+        .icon {
+            width: 50px;
+            height: 70px;
+            color: #030303;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        .icon:hover {
+            background-color: #8EF913;
+            border-radius: 5px;
+        }
+
     </style>
 </head>
 <body>
+    <div class="sidebar">
+        <a href="/" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
+        <a href="/dashboard" class="icon"><i class="fa-solid fa-share-nodes fa-xl"></i></a>
+        <a href="/profile" class="icon"><i class="fa-solid fa-user-group fa-xl"></i></a>
+        <a href="/settings" class="icon"><i class="fa-solid fa-calendar fa-xl"></i></a>
+        <a href="/statistics" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
+    </div>
     <div class="profile-container">
         <div class="header">
             <h1 style="margin-right: 50px;"> Profile</h1>
