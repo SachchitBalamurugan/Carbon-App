@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eco Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+
     <style>
         * {
             box-sizing: border-box;
@@ -244,9 +246,55 @@
         .modal-content button:hover {
             background-color: #79D110;
         }
+
+        #plan-list {
+    display: flex;
+    flex-direction: column; /* Align items vertically */
+    align-items: flex-start; /* Align items to the start (left) of the container */
+    padding: 10px;
+    gap: 10px; /* Optional: Adds space between items */
+}
+
+/* Default styling for days */
+.day-item {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Active day styling */
+.day-item.active {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+}
+
+
+.plan-card {
+    display: flex;
+    align-items: center; /* Center align items within the card */
+    background-color: #f9f9f9; /* Optional: Background color for cards */
+    border: 1px solid #ddd; /* Optional: Border for cards */
+    border-radius: 5px; /* Optional: Rounded corners for cards */
+    padding: 10px; /* Padding inside the card */
+    width: 100%; /* Ensure the card takes full width of the container */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
     </style>
 </head>
 <body>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+
+<script defer src="{{ url_for('static', filename='init-firebase.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
     <div class="sidebar">
         <a href="/" class="icon"><i class="fa-solid fa-table-columns fa-xl"></i></a>
         <a href="/dashboard" class="icon"><i class="fa-solid fa-share-nodes fa-xl"></i></a>
@@ -270,8 +318,9 @@
                 </div>
                 <h2 style="margin-bottom: 17px; font-size: 20px;">My activities</h2>
                 <div class="activities">
-                    <h3 id="earned-points" style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight:300;">Total Emmisions: 0</h3>
-                    <div id="activity-list">
+                    <h3 id="earned-points" style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight:300;">Earned points: 0</h3>
+                    <h3 id="total-emissions" style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight:300;">Total emissions saved: 0 kg</h3>
+                <div id="activity-list">
                         
                     </div>
                     <button>All activities</button>
@@ -279,113 +328,37 @@
                 </div>
                 <div class="emissions-saved">
                     <h2 style="margin-bottom: 17px; font-size: 20px;">Total emissions saved</h2>
-                    <div class="chart"></div>
+                    <canvas id="emissionsChart" class="chart"></canvas>
                 </div>
+                
             </div>
-
             <div class="stats-section">
                 <div class="stats">
                     <h2>Today's Stats</h2>
-                    <div class="stats-grid">
-                        <div>Mon</div>
-                        <div>Tue</div>
-                        <div>Wed</div>
-                        <div>Thu</div>
-                        <div>Fri</div>
-                        <div>Sat</div>
-                        <div>Sun</div>
+                    <div class="stats-grid" id="stats-grid">
+                        <div data-day="Mon">Mon</div>
+                        <div data-day="Tue">Tue</div>
+                        <div data-day="Wed">Wed</div>
+                        <div data-day="Thu">Thu</div>
+                        <div data-day="Fri">Fri</div>
+                        <div data-day="Sat">Sat</div>
+                        <div data-day="Sun">Sun</div>
                     </div>
                     <div class="plans">
                         <h3>Future plans</h3>
-                        <div class="plan-card">
-                            
-                            <div style="display: flex; align-items: center;">
-                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
-                                    2
-                                </div>
-                                <div style="display: inline-block; margin-left: 10px;">
-                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
-                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
-                                </div>
-                                <div style="margin-left: 55px; color: #5D5D5B;">
-                                    <p>2-2-24</p>
-                                </div>
-                            </div>
-                    
-                            
+                        <div id="badge-info">
+                            <!-- Badge information will be displayed here -->
                         </div>
-                        <div class="plan-card">
+                        <div id="plan-list">
                             
-                            <div style="display: flex; align-items: center;">
-                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
-                                    2
-                                </div>
-                                <div style="display: inline-block; margin-left: 10px;">
-                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
-                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
-                                </div>
-                                <div style="margin-left: 55px; color: #5D5D5B;">
-                                    <p>2-2-24</p>
-                                </div>
-                            </div>
-                    
-                            
-                        </div>
-                        <div class="plan-card">
-                            
-                            <div style="display: flex; align-items: center;">
-                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
-                                    2
-                                </div>
-                                <div style="display: inline-block; margin-left: 10px;">
-                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
-                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
-                                </div>
-                                <div style="margin-left: 55px; color: #5D5D5B;">
-                                    <p>2-2-24</p>
-                                </div>
-                            </div>
-                    
-                            
-                        </div>
-                        <div class="plan-card">
-                            
-                            <div style="display: flex; align-items: center;">
-                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
-                                    2
-                                </div>
-                                <div style="display: inline-block; margin-left: 10px;">
-                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
-                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
-                                </div>
-                                <div style="margin-left: 55px; color: #5D5D5B;">
-                                    <p>2-2-24</p>
-                                </div>
-                            </div>
-                    
-                            
-                        </div>
-                        <div class="plan-card">
-                            
-                            <div style="display: flex; align-items: center;">
-                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%;  font-weight: bold;">
-                                    2
-                                </div>
-                                <div style="display: inline-block; margin-left: 10px;">
-                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
-                                    <p style="color: #5D5D5B;">3 of 5 badges earned, EcoChamp</p>
-                                </div>
-                                <div style="margin-left: 55px; color: #5D5D5B;">
-                                    <p>2-2-24</p>
-                                </div>
-                            </div>
-                    
-                            
+                            <!-- Plans will be dynamically added here -->
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            
+           
+            
     </div>
 
     <!-- The Modal -->
@@ -410,1010 +383,622 @@
 
 
 
-<script>
-    // List of activities with their CO2 emissions per unit
-    var activities = {
-        "Driving a car (gasoline) 1 km": 0.192,
-        "Driving a car (diesel) 1 km": 0.220,
-        "Flying (economy class) 1 km": 0.115,
-        "Flying (business class) 1 km": 0.230,
-        "Heating a home with natural gas (per hour)": 1.91,
-        "Using a 60W incandescent light bulb for 1 hour": 0.042,
-        "Watching TV for 1 hour": 0.088,
-        "Using a laptop for 1 hour": 0.015,
-        "Boiling a kettle (1 time)": 0.015,
-        "Charging a smartphone (1 full charge)": 0.005,
-        "Cooking with electric oven (1 hour)": 1.15,
-        "Cooking with gas stove (1 hour)": 0.32,
-        "Running a washing machine (per load)": 0.6,
-        "Running a dishwasher (per load)": 0.54,
-        "Taking a 10-minute shower": 0.8,
-        "Using a hair dryer for 10 minutes": 0.09,
-        "Recycling 1 kg of paper": -0.91,
-        "Producing 1 kg of plastic": 6.0,
-        "Producing 1 kg of steel": 2.0,
-        "Producing 1 kg of aluminum": 11.0,
-        "Producing 1 kg of rice": 2.7,
-        "Eating 1 kg of beef": 27.0,
-        "Eating 1 kg of chicken": 6.9,
-        "Eating 1 kg of pork": 12.1,
-        "Eating 1 kg of lamb": 39.2,
-        "Eating 1 kg of cheese": 13.5,
-        "Drinking 1 liter of milk": 1.2,
-        "Growing a Christmas tree (cutting)": 2.6,
-        "Driving a car (gasoline) 1 km": 0.192,
-        "Driving a car (diesel) 1 km": 0.220,
-        "Flying (economy class) 1 km": 0.115,
-        "Flying (business class) 1 km": 0.230,
-        "Heating a home with natural gas (per hour)": 1.91,
-        "Using a 60W incandescent light bulb for 1 hour": 0.042,
-        "Watching TV for 1 hour": 0.088,
-        "Using a laptop for 1 hour": 0.015,
-        "Boiling a kettle (1 time)": 0.015,
-        "Charging a smartphone (1 full charge)": 0.005,
-        "Cooking with electric oven (1 hour)": 1.15,
-        "Cooking with gas stove (1 hour)": 0.32,
-        "Running a washing machine (per load)": 0.6,
-        "Running a dishwasher (per load)": 0.54,
-        "Taking a 10-minute shower": 0.8,
-        "Using a hair dryer for 10 minutes": 0.09,
-        "Recycling 1 kg of paper": -0.91,
-        "Producing 1 kg of plastic": 6.0,
-        "Producing 1 kg of steel": 2.0,
-        "Producing 1 kg of aluminum": 11.0,
-        "Producing 1 kg of rice": 2.7,
-        "Eating 1 kg of beef": 27.0,
-        "Eating 1 kg of chicken": 6.9,
-        "Eating 1 kg of pork": 12.1,
-        "Eating 1 kg of lamb": 39.2,
-        "Eating 1 kg of cheese": 13.5,
-        "Drinking 1 liter of milk": 1.2,
-        "Growing a Christmas tree (cutting)": 2.6,
-        "Driving a motorcycle 1 km": 0.075,
-        "Driving a bus 1 km": 0.098,
-        "Driving a truck 1 km": 0.170,
-        "Using a coal-fired power plant (per kWh)": 0.915,
-        "Using a wind turbine (per kWh)": 0.012,
-        "Using a solar panel (per kWh)": 0.020,
-        "Using a geothermal plant (per kWh)": 0.009,
-        "Using a hydropower plant (per kWh)": 0.015,
-        "Planting a tree (per tree)": -0.25,
-        "Manufacturing 1 kg of cement": 0.930,
-        "Manufacturing 1 kg of glass": 0.75,
-        "Manufacturing 1 kg of textile": 5.0,
-        "Taking a bus ride (per km)": 0.09,
-        "Taking a train ride (per km)": 0.041,
-        "Taking a metro ride (per km)": 0.035,
-        "Using an air conditioner (per hour)": 0.60,
-        "Using a heater (per hour)": 0.40,
-        "Using a refrigerator (per day)": 1.0,
-        "Using a freezer (per day)": 1.5,
-        "Using a washing machine (per load)": 0.8,
-        "Using a tumble dryer (per load)": 2.0,
-        "Using a dishwasher (per load)": 1.2,
-        "Running an electric stove (per hour)": 1.2,
-        "Running a gas stove (per hour)": 0.3,
-        "Using a microwave (per minute)": 0.02,
-        "Playing video games for 1 hour": 0.050,
-        "Using a coffee machine (per cup)": 0.015,
-        "Using an electric blanket (per hour)": 0.10,
-        "Using a clothes iron (per hour)": 1.2,
-        "Using a hair straightener (per use)": 0.2,
-        "Using a hair curler (per use)": 0.3,
-        "Running a vacuum cleaner (per hour)": 0.4,
-        "Running a blender (per minute)": 0.015,
-        "Using a toaster (per use)": 0.05,
-        "Using a food processor (per minute)": 0.03,
-        "Using a slow cooker (per hour)": 0.2,
-        "Using a pressure cooker (per hour)": 0.25,
-        "Charging an electric vehicle (per kWh)": 0.3,
-        "Charging a hybrid vehicle (per kWh)": 0.2,
-        "Heating a pool (per hour)": 1.5,
-        "Cooling a pool (per hour)": 1.2,
-        "Using a sauna (per hour)": 2.0,
-        "Using a hot tub (per hour)": 2.5,
-        "Using a treadmill (per hour)": 0.4,
-        "Using an elliptical trainer (per hour)": 0.3,
-        "Using a rowing machine (per hour)": 0.5,
-        "Using a stationary bike (per hour)": 0.4,
-        "Using a stepper (per hour)": 0.3,
-        "Using a massage chair (per hour)": 0.5,
-        "Using a weight bench (per hour)": 0.2,
-        "Using a home gym (per hour)": 0.6,
-        "Using a smart speaker (per hour)": 0.02,
-        "Using a tablet (per hour)": 0.03,
-        "Using a desktop computer (per hour)": 0.07,
-        "Using a printer (per page)": 0.01,
-        "Using a scanner (per page)": 0.02,
-        "Using a fax machine (per page)": 0.03,
-        "Using a copier (per page)": 0.02,
-        "Using a projector (per hour)": 0.1,
-        "Using a conference phone (per hour)": 0.04,
-        "Using a microwave oven (per use)": 0.015,
-        "Using a hairdryer (per use)": 0.05,
-        "Using a space heater (per hour)": 0.4,
-        "Using a dehumidifier (per hour)": 0.5,
-        "Using an air purifier (per hour)": 0.2,
-        "Using a humidifier (per hour)": 0.1,
-        "Using a fan (per hour)": 0.03,
-        "Using a heater (per hour)": 0.4,
-        "Using a cooler (per hour)": 0.3,
-        "Using a heat pump (per hour)": 0.25,
-        "Using a solar water heater (per hour)": 0.02,
-        "Using a biomass heater (per hour)": 0.5,
-        "Using a pellet stove (per hour)": 0.4,
-        "Using a wood stove (per hour)": 0.6,
-        "Using a coal stove (per hour)": 0.9,
-        "Using a gas heater (per hour)": 0.3,
-        "Using an oil heater (per hour)": 0.5,
-        "Using a kerosene heater (per hour)": 0.6,
-        "Using a propane heater (per hour)": 0.4,
-        "Using a diesel generator (per kWh)": 0.7,
-        "Using a gas generator (per kWh)": 0.5,
-        "Using a solar generator (per kWh)": 0.02,
-        "Using a wind generator (per kWh)": 0.012,
-        "Using a hydro generator (per kWh)": 0.015,
-        "Using a geothermal generator (per kWh)": 0.009,
-        "Using a biogas generator (per kWh)": 0.1,
-        "Using a tidal generator (per kWh)": 0.01,
-        "Using a wave generator (per kWh)": 0.02,
-        "Using a fusion reactor (per kWh)": 0.0,
-        "Using a nuclear reactor (per kWh)": 0.01,
-        "Using a thorium reactor (per kWh)": 0.01,
-        "Using a geothermal heat pump (per hour)": 0.02,
-        "Using a solar thermal collector (per hour)": 0.01,
-        "Using a wind turbine (per hour)": 0.01,
-        "Using a biomass boiler (per hour)": 0.1,
-        "Using a pellet boiler (per hour)": 0.2,
-        "Using a wood boiler (per hour)": 0.3,
-        "Using a coal boiler (per hour)": 0.5,
-        "Using an oil boiler (per hour)": 0.4,
-        "Using a gas boiler (per hour)": 0.3,
-        "Using a propane boiler (per hour)": 0.2,
-        "Using a kerosene boiler (per hour)": 0.3,
-        "Using a diesel boiler (per hour)": 0.4,
-        "Using a heat exchanger (per hour)": 0.05,
-        "Using a thermal storage (per hour)": 0.03,
-        "Using a hot water tank (per hour)": 0.02,
-        "Using a cold water tank (per hour)": 0.01,
-        "Using a water heater (per hour)": 0.1,
-        "Using a heat pump water heater (per hour)": 0.03,
-        "Using a solar water heater (per hour)": 0.01,
-        "Using a geothermal water heater (per hour)": 0.02,
-        "Using a biomass water heater (per hour)": 0.1,
-        "Using a pellet water heater (per hour)": 0.15,
-        "Using a wood water heater (per hour)": 0.2,
-        "Using a coal water heater (per hour)": 0.3,
-        "Using an oil water heater (per hour)": 0.25,
-        "Using a gas water heater (per hour)": 0.2,
-        "Using a propane water heater (per hour)": 0.15,
-        "Using a kerosene water heater (per hour)": 0.2,
-        "Using a diesel water heater (per hour)": 0.3,
-        "Using a heat pump space heater (per hour)": 0.03,
-        "Using a solar space heater (per hour)": 0.01,
-        "Using a geothermal space heater (per hour)": 0.02,
-        "Using a biomass space heater (per hour)": 0.1,
-        "Using a pellet space heater (per hour)": 0.15,
-        "Using a wood space heater (per hour)": 0.2,
-        "Using a coal space heater (per hour)": 0.3,
-        "Using an oil space heater (per hour)": 0.25,
-        "Using a gas space heater (per hour)": 0.2,
-        "Using a propane space heater (per hour)": 0.15,
-        "Using a kerosene space heater (per hour)": 0.2,
-        "Using a diesel space heater (per hour)": 0.3,
-        "Using a smart thermostat (per hour)": 0.01,
-        "Using a programmable thermostat (per hour)": 0.02,
-        "Using a manual thermostat (per hour)": 0.03,
-        "Using a non-programmable thermostat (per hour)": 0.04,
-        "Using a remote control thermostat (per hour)": 0.02,
-        "Using a wifi thermostat (per hour)": 0.01,
-        "Using a Bluetooth thermostat (per hour)": 0.01,
-        "Using a touchscreen thermostat (per hour)": 0.02,
-        "Using a dial thermostat (per hour)": 0.03,
-        "Using a mercury thermostat (per hour)": 0.04,
-        "Using a mechanical thermostat (per hour)": 0.03,
-        "Using an electronic thermostat (per hour)": 0.02,
-        "Using a digital thermostat (per hour)": 0.01,
-        "Using a smart plug (per hour)": 0.01,
-        "Using a power strip (per hour)": 0.02,
-        "Using a surge protector (per hour)": 0.03,
-        "Using a USB charger (per hour)": 0.01,
-        "Using a power adapter (per hour)": 0.02,
-        "Using a wall socket (per hour)": 0.01,
-        "Using a power outlet (per hour)": 0.01,
-        "Using a power cord (per hour)": 0.01,
-        "Using a charging cable (per hour)": 0.01,
-        "Using a power bank (per hour)": 0.01,
-        "Using a battery charger (per hour)": 0.02,
-        "Using a car charger (per hour)": 0.03,
-        "Using a wall charger (per hour)": 0.02,
-        "Using a travel adapter (per hour)": 0.01,
-        "Using a multi-port charger (per hour)": 0.02,
-        "Using a wireless charger (per hour)": 0.01,
-        "Using a fast charger (per hour)": 0.03,
-        "Using a slow charger (per hour)": 0.01,
-        "Using a laptop charger (per hour)": 0.03,
-        "Using a tablet charger (per hour)": 0.02,
-        "Using a phone charger (per hour)": 0.01,
-        "Using a smartwatch charger (per hour)": 0.01,
-        "Using a fitness tracker charger (per hour)": 0.01,
-        "Using a Bluetooth headset charger (per hour)": 0.01,
-        "Using a wireless headset charger (per hour)": 0.01,
-        "Using a gaming console charger (per hour)": 0.02,
-        "Using a handheld console charger (per hour)": 0.01,
-        "Using a VR headset charger (per hour)": 0.02,
-        "Using a drone charger (per hour)": 0.03,
-        "Using a camera charger (per hour)": 0.02,
-        "Using a flashlight charger (per hour)": 0.01,
-        "Using a headlamp charger (per hour)": 0.01,
-        "Using a lantern charger (per hour)": 0.02,
-        "Using a solar charger (per hour)": 0.01,
-        "Using a portable charger (per hour)": 0.01,
-        "Using a power station (per hour)": 0.05,
-        "Using a generator (per hour)": 0.5,
-        "Using a car battery (per hour)": 0.02,
-        "Using a deep cycle battery (per hour)": 0.03,
-        "Using a marine battery (per hour)": 0.02,
-        "Using an AGM battery (per hour)": 0.02,
-        "Using a lithium battery (per hour)": 0.01,
-        "Using a lead-acid battery (per hour)": 0.02,
-        "Using a nickel-cadmium battery (per hour)": 0.03,
-        "Using a nickel-metal hydride battery (per hour)": 0.02,
-        "Using a rechargeable battery (per hour)": 0.01,
-        "Using a disposable battery (per hour)": 0.02,
-        "Using a button cell battery (per hour)": 0.01,
-        "Using a hearing aid battery (per hour)": 0.01,
-        "Using a smoke detector battery (per hour)": 0.01,
-        "Using a remote control battery (per hour)": 0.01,
-        "Using a flashlight battery (per hour)": 0.01,
-        "Using a camera battery (per hour)": 0.02,
-        "Using a drone battery (per hour)": 0.03,
-        "Using a toy battery (per hour)": 0.01,
-        "Using a clock battery (per hour)": 0.01,
-        "Using a thermostat battery (per hour)": 0.01,
-        "Using a keyboard battery (per hour)": 0.01,
-        "Using a mouse battery (per hour)": 0.01,
-        "Using a game controller battery (per hour)": 0.01,
-        "Using a printer cartridge (per cartridge)": 0.1,
-        "Using a toner cartridge (per cartridge)": 0.2,
-        "Using a fax toner (per toner)": 0.15,
-        "Using a copier toner (per toner)": 0.2,
-        "Using a scanner cartridge (per cartridge)": 0.1,
-        "Using a label printer (per label)": 0.01,
-        "Using a thermal printer (per print)": 0.02,
-        "Using a inkjet printer (per page)": 0.02,
-        "Using a laser printer (per page)": 0.03,
-        "Using a 3D printer (per hour)": 0.1,
-        "Using a plotter (per hour)": 0.15,
-        "Using a photo printer (per print)": 0.02,
-        "Using a document scanner (per scan)": 0.02,
-        "Using a barcode scanner (per scan)": 0.01,
-        "Using a RFID reader (per scan)": 0.01,
-        "Using a magnetic stripe reader (per scan)": 0.01,
-        "Using a credit card reader (per transaction)": 0.01,
-        "Using a point of sale terminal (per transaction)": 0.02,
-        "Using a payment terminal (per transaction)": 0.01,
-        "Using a receipt printer (per receipt)": 0.01,
-        "Using a cash register (per transaction)": 0.02,
-        "Using a digital scale (per weigh)": 0.01,
-        "Using a mechanical scale (per weigh)": 0.02,
-        "Using a kitchen scale (per weigh)": 0.01,
-        "Using a luggage scale (per weigh)": 0.01,
-        "Using a bathroom scale (per weigh)": 0.01,
-        "Using a body fat scale (per weigh)": 0.02,
-        "Using a fitness tracker (per day)": 0.02,
-        "Using a pedometer (per day)": 0.01,
-        "Using a heart rate monitor (per day)": 0.02,
-        "Using a blood pressure monitor (per day)": 0.01,
-        "Using a glucose monitor (per day)": 0.01,
-        "Using a thermometer (per use)": 0.01,
-        "Using a pulse oximeter (per use)": 0.01,
-        "Using a stethoscope (per use)": 0.01,
-        "Using a sphygmomanometer (per use)": 0.01,
-        "Using an otoscope (per use)": 0.01,
-        "Using an ophthalmoscope (per use)": 0.01,
-        "Using a nebulizer (per use)": 0.02,
-        "Using an inhaler (per use)": 0.01,
-        "Using a CPAP machine (per hour)": 0.1,
-        "Using an oxygen concentrator (per hour)": 0.2,
-        "Using a suction machine (per hour)": 0.3,
-        "Using a ventilator (per hour)": 0.5,
-        "Using an infusion pump (per hour)": 0.2,
-        "Using a dialysis machine (per hour)": 0.4,
-        "Using an ultrasound machine (per hour)": 0.3,
-        "Using an X-ray machine (per hour)": 0.5,
-        "Using an MRI machine (per hour)": 1.0,
-        "Using a CT scanner (per hour)": 0.8,
-        "Using a PET scanner (per hour)": 1.2,
-        "Using a gamma camera (per hour)": 0.7,
-        "Using a mammogram machine (per hour)": 0.6,
-        "Using a biopsy machine (per hour)": 0.5,
-        "Using a surgical robot (per hour)": 1.0,
-        "Using a lab centrifuge (per hour)": 0.3,
-        "Using a lab incubator (per hour)": 0.2,
-        "Using a lab autoclave (per hour)": 0.4,
-        "Using a lab microscope (per hour)": 0.1,
-        "Using a lab spectrophotometer (per hour)": 0.2,
-        "Using a lab pipette (per use)": 0.01,
-        "Using a lab scale (per use)": 0.02,
-        "Using a lab water bath (per hour)": 0.3,
-        "Using a lab hot plate (per hour)": 0.4,
-        "Using a lab stirrer (per hour)": 0.2,
-        "Using a lab shaker (per hour)": 0.3,
-        "Using a lab oven (per hour)": 0.5,
-        "Using a lab furnace (per hour)": 0.6,
-        "Using a lab Bunsen burner (per hour)": 0.2,
-        "Using a lab gas burner (per hour)": 0.3,
-        "Using a lab flame photometer (per hour)": 0.2,
-        "Using a lab atomic absorption spectrometer (per hour)": 0.4,
-        "Using a lab fluorescence spectrometer (per hour)": 0.3,
-        "Using a lab NMR spectrometer (per hour)": 0.5,
-        "Using a lab IR spectrometer (per hour)": 0.4,
-        "Using a lab X-ray diffractometer (per hour)": 0.6,
-        "Using a lab mass spectrometer (per hour)": 0.7,
-        "Using a lab chromatograph (per hour)": 0.5,
-        "Using a lab electrophoresis apparatus (per hour)": 0.2,
-        "Using a lab gel electrophoresis apparatus (per hour)": 0.2,
-        "Using a lab western blot apparatus (per hour)": 0.3,
-        "Using a lab ELISA reader (per hour)": 0.3,
-        "Using a lab PCR machine (per hour)": 0.4,
-        "Using a lab centrifuge (per hour)": 0.3,
-        "Using a lab homogenizer (per hour)": 0.3,
-        "Using a lab water purifier (per hour)": 0.2,
-        "Using a lab water distiller (per hour)": 0.3,
-        "Using a lab water ionizer (per hour)": 0.2,
-        "Using a lab water softener (per hour)": 0.2,
-        "Using a lab water filtration system (per hour)": 0.2,
-        "Using a lab water circulation system (per hour)": 0.3,
-        "Using a lab water deionizer (per hour)": 0.3,
-        "Using a lab water reverse osmosis system (per hour)": 0.4,
-        "Using a lab water UV purifier (per hour)": 0.2,
-        "Using a lab water ozone purifier (per hour)": 0.3,
-        "Using a lab water electrolysis system (per hour)": 0.4,
-        "Using a lab water distillation system (per hour)": 0.5,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softener unit (per hour)": 0.2,
-        "Using a lab water ionizer unit (per hour)": 0.2,
-        "Using a lab water deionizer unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
-        "Using a lab water ozone unit (per hour)": 0.3,
-        "Using a lab water electrolysis unit (per hour)": 0.4,
-        "Using a lab water distillation unit (per hour)": 0.5,
-        "Using a lab water purification unit (per hour)": 0.3,
-        "Using a lab water filtration unit (per hour)": 0.3,
-        "Using a lab water softening unit (per hour)": 0.2,
-        "Using a lab water ionization unit (per hour)": 0.2,
-        "Using a lab water deionization unit (per hour)": 0.3,
-        "Using a lab water reverse osmosis unit (per hour)": 0.4,
-        "Using a lab water UV unit (per hour)": 0.2,
 
-        
-        // Add more activities as needed
-    };
-// Initialize totals
+<script>
+    
+    // List of activities with their CO2 emissions per unit
+    const transportation = [
+  "Driving a car (gasoline) 1 km: 0.192 kg CO2e",
+  "Driving a car (diesel) 1 km: 0.220 kg CO2e",
+  "Driving a motorcycle 1 km: 0.075 kg CO2e",
+  "Driving a bus 1 km: 0.098 kg CO2e",
+  "Flying (economy class) 1 km: 0.115 kg CO2e",
+  "Flying (business class) 1 km: 0.230 kg CO2e",
+  "Taking a bus ride (per km): 0.09 kg CO2e",
+  "Taking a train ride (per km): 0.041 kg CO2e",
+  "Taking a metro ride (per km): 0.035 kg CO2e",
+  "Driving a truck 1 km: 0.170 kg CO2e",
+  "Cycling 1 km: 0.0 kg CO2e",
+  "Walking 1 km: 0.0 kg CO2e",
+  "Using a ferry (per km): 0.250 kg CO2e",
+  "Electric scooter 1 km: 0.020 kg CO2e",
+  "Electric bike 1 km: 0.005 kg CO2e",
+  "Electric car (per km): 0.080 kg CO2e",
+  "Carpooling (per km): 0.070 kg CO2e",
+  "Driving an electric bus (per km): 0.050 kg CO2e",
+  "Electric tram (per km): 0.030 kg CO2e",
+  "Taking an electric ferry (per km): 0.040 kg CO2e",
+  "Electric train ride (per km): 0.020 kg CO2e",
+  "Riding a horse (per km): 0.010 kg CO2e",
+  "Shipping freight (per ton-km): 0.020 kg CO2e",
+  "Using an electric skateboard (per km): 0.015 kg CO2e",
+  // ... 175 more entries
+];
+const food = [
+  "Eating 1 kg of beef: 27.0 kg CO2e",
+  "Eating 1 kg of chicken: 6.9 kg CO2e",
+  "Eating 1 kg of pork: 12.1 kg CO2e",
+  "Eating 1 kg of lamb: 39.2 kg CO2e",
+  "Eating 1 kg of cheese: 13.5 kg CO2e",
+  "Drinking 1 liter of milk: 1.2 kg CO2e",
+  "Producing 1 kg of rice: 2.7 kg CO2e",
+  "Eating 1 kg of potatoes: 0.4 kg CO2e",
+  "Eating 1 kg of eggs: 4.8 kg CO2e",
+  "Drinking 1 liter of almond milk: 0.6 kg CO2e",
+  "Drinking 1 liter of soy milk: 0.9 kg CO2e",
+  "Eating 1 kg of fish (farmed): 5.0 kg CO2e",
+  "Eating 1 kg of lentils: 0.9 kg CO2e",
+  "Eating 1 kg of broccoli: 0.2 kg CO2e",
+  "Drinking 1 cup of coffee: 0.02 kg CO2e",
+  "Eating 1 kg of tofu: 3.2 kg CO2e",
+  "Drinking 1 liter of orange juice: 0.9 kg CO2e",
+  "Eating 1 kg of chocolate: 19.0 kg CO2e",
+  "Eating 1 kg of avocados: 2.0 kg CO2e",
+  "Drinking 1 liter of beer: 1.5 kg CO2e",
+  "Eating 1 kg of bananas: 0.5 kg CO2e",
+  "Eating 1 kg of peanuts: 2.6 kg CO2e",
+  "Eating 1 kg of soybeans: 2.1 kg CO2e",
+  "Eating 1 kg of apples: 0.3 kg CO2e",
+  "Drinking 1 liter of wine: 1.2 kg CO2e",
+  "Eating 1 kg of pasta: 1.1 kg CO2e",
+  // ... 175 more entries
+];
+const household = [
+  "Heating a home with natural gas (per hour): 1.91 kg CO2e",
+  "Using a 60W incandescent light bulb for 1 hour: 0.042 kg CO2e",
+  "Watching TV for 1 hour: 0.088 kg CO2e",
+  "Using a laptop for 1 hour: 0.015 kg CO2e",
+  "Boiling a kettle (1 time): 0.015 kg CO2e",
+  "Cooking with electric oven (1 hour): 1.15 kg CO2e",
+  "Running a washing machine (per load): 0.6 kg CO2e",
+  "Taking a 10-minute shower: 0.8 kg CO2e",
+  "Using a dishwasher (per load): 1.2 kg CO2e",
+  "Charging an electric vehicle (per kWh): 0.3 kg CO2e",
+  "Running a vacuum cleaner (per hour): 0.4 kg CO2e",
+  "Using an electric blanket (per hour): 0.1 kg CO2e",
+  "Using an air conditioner (per hour): 0.6 kg CO2e",
+  "Using a space heater (per hour): 0.4 kg CO2e",
+  "Using a refrigerator (per day): 1.0 kg CO2e",
+  "Using a freezer (per day): 1.5 kg CO2e",
+  "Using a hairdryer (per use): 0.05 kg CO2e",
+  "Running a tumble dryer (per load): 2.0 kg CO2e",
+  "Using a microwave (per minute): 0.02 kg CO2e",
+  "Running an electric stove (per hour): 1.2 kg CO2e",
+  "Charging a smartphone (1 full charge): 0.005 kg CO2e",
+  "Using a fan (per hour): 0.03 kg CO2e",
+  "Running a blender (per minute): 0.015 kg CO2e",
+  "Using a clothes iron (per hour): 1.2 kg CO2e",
+  "Using a dehumidifier (per hour): 0.5 kg CO2e",
+  // ... 175 more entries
+];
+const manufacturing = [
+  "Producing 1 kg of plastic: 6.0 kg CO2e",
+  "Producing 1 kg of steel: 2.0 kg CO2e",
+  "Producing 1 kg of aluminum: 11.0 kg CO2e",
+  "Producing 1 kg of cement: 0.930 kg CO2e",
+  "Producing 1 kg of glass: 0.75 kg CO2e",
+  "Manufacturing 1 kg of textile: 5.0 kg CO2e",
+  "Manufacturing 1 car: 6,000 kg CO2e",
+  "Producing 1 pair of shoes: 14 kg CO2e",
+  "Producing 1 kg of paper: 1.5 kg CO2e",
+  "Producing 1 smartphone: 85 kg CO2e",
+  "Manufacturing 1 computer: 300 kg CO2e",
+  "Producing 1 kg of bricks: 0.45 kg CO2e",
+  "Producing 1 pair of jeans: 25 kg CO2e",
+  "Producing 1 kg of rubber: 2.4 kg CO2e",
+  "Producing 1 kg of glass bottles: 0.8 kg CO2e",
+  "Producing 1 car tire: 24 kg CO2e",
+  "Producing 1 steel beam (1 meter): 15 kg CO2e",
+  "Producing 1 kg of fertilizer: 6.8 kg CO2e",
+  "Producing 1 kg of paint: 4.0 kg CO2e",
+  "Producing 1 kg of batteries: 15 kg CO2e",
+  "Producing 1 solar panel: 50 kg CO2e",
+  "Producing 1 wind turbine blade: 100 kg CO2e",
+  "Producing 1 kg of copper wire: 2.5 kg CO2e",
+  "Producing 1 kg of styrofoam: 6.0 kg CO2e",
+  "Producing 1 kg of ceramic tiles: 0.9 kg CO2e",
+  // ... 175 more entries
+];
+const environmental = [
+  "Recycling 1 kg of paper: -0.91 kg CO2e",
+  "Planting a tree (per tree): -0.25 kg CO2e",
+  "Growing a Christmas tree (cutting): 2.6 kg CO2e",
+  "Using a wind turbine (per kWh): 0.012 kg CO2e",
+  "Using a solar panel (per kWh): 0.020 kg CO2e",
+  "Using a geothermal plant (per kWh): 0.009 kg CO2e",
+  "Using a hydropower plant (per kWh): 0.015 kg CO2e",
+  "Using a biomass heater (per hour): 0.5 kg CO2e",
+  "Using a nuclear power plant (per kWh): 0.01 kg CO2e",
+  "Recycling 1 kg of aluminum: -8.0 kg CO2e",
+  "Recycling 1 kg of steel: -1.4 kg CO2e",
+  "Composting 1 kg of organic waste: -0.2 kg CO2e",
+  "Using a fusion reactor (per kWh): 0.0 kg CO2e",
+  "Using a tidal generator (per kWh): 0.01 kg CO2e",
+  "Using a wave generator (per kWh): 0.02 kg CO2e",
+  "Using a smart thermostat (per hour): 0.01 kg CO2e",
+  "Offsetting carbon footprint (per ton): -1,000 kg CO2e",
+  "Growing organic produce (per kg): -0.5 kg CO2e",
+  "Producing biogas (per kWh): -0.1 kg CO2e",
+  "Capturing CO2 through direct air capture (per ton): -500 kg CO2e",
+  "Recycling plastic (per kg): -1.7 kg CO2e",
+  "Using geothermal energy (per kWh): 0.02 kg CO2e",
+  "Using a heat pump (per hour): 0.03 kg CO2e",
+  "Using a solar water heater (per hour): 0.02 kg CO2e",
+  "Recycling glass (per kg): -0.5 kg CO2e",
+  // ... 175 more entries
+];
+
+    //    // Initialize totals
+
+    const activities = {
+    transportation: {
+  "Driving a car (gasoline) 1 km": 0.192,
+  "Driving a car (diesel) 1 km": 0.220,
+  "Driving a motorcycle 1 km": 0.075,
+  "Driving a bus 1 km": 0.098,
+  "Flying (economy class) 1 km": 0.115,
+  "Flying (business class) 1 km": 0.230,
+  "Taking a bus ride (per km)": 0.090,
+  "Taking a train ride (per km)": 0.041,
+  "Taking a metro ride (per km)": 0.035,
+  "Driving a truck 1 km": 0.170,
+  "Cycling 1 km": 0.000,
+  "Walking 1 km": 0.000,
+  "Using a ferry (per km)": 0.250,
+  "Electric scooter 1 km": 0.020,
+  "Electric bike 1 km": 0.005,
+  "Electric car (per km)": 0.080,
+  "Carpooling (per km)": 0.070,
+  "Driving an electric bus (per km)": 0.050,
+  "Electric tram (per km)": 0.030,
+  "Taking an electric ferry (per km)": 0.040,
+  "Electric train ride (per km)": 0.020,
+  "Riding a horse (per km)": 0.010,
+  "Shipping freight (per ton-km)": 0.020,
+  "Using an electric skateboard (per km)": 0.015,
+    "Driving a hybrid car (per km)": 0.140,
+    "Car sharing (per km)": 0.060,
+    "Renting a car (per km)": 0.100,
+    "Driving a van (per km)": 0.200,
+    "Driving a SUV (per km)": 0.250,
+    "Driving a convertible (per km)": 0.180,
+    "Driving a pickup truck (per km)": 0.210,
+    "Driving a campervan (per km)": 0.300,
+    "Driving a minivan (per km)": 0.220,
+    "Driving a luxury car (per km)": 0.250,
+    "Driving a sports car (per km)": 0.280,
+    "Driving a compact car (per km)": 0.150,
+    "Using a motorboat (per km)": 0.300,
+    "Using a sailboat (per km)": 0.150,
+    "Using a jet ski (per km)": 0.350,
+    "Taking a ferry (per km)": 0.250,
+    "Using a helicopter (per km)": 1.000,
+    "Using a private jet (per km)": 1.500,
+    "Using a commercial jet (per km)": 0.500,
+    "Driving a taxi (per km)": 0.180,
+    "Using a ride-sharing service (per km)": 0.170,
+    "Driving an electric van (per km)": 0.060,
+    "Driving an electric SUV (per km)": 0.080,
+    "Driving a hybrid bus (per km)": 0.090,
+    "Driving an electric motorcycle (per km)": 0.040,
+    "Using an electric ferry (per km)": 0.050,
+    "Using a cable car (per km)": 0.020,
+    "Using a monorail (per km)": 0.040,
+    "Driving an autonomous car (per km)": 0.160,
+    "Taking a luxury bus (per km)": 0.120,
+    "Using an electric scooter (per km)": 0.020,
+    "Using an electric bike (per km)": 0.010,
+    "Taking a ride-sharing bike (per km)": 0.015,
+    "Using a bicycle (per km)": 0.000,
+    "Using a scooter (per km)": 0.025,
+    "Driving a classic car (per km)": 0.250,
+    "Driving a vintage car (per km)": 0.280,
+    "Driving a small car (per km)": 0.140,
+    "Driving a large car (per km)": 0.220,
+    "Driving a compact SUV (per km)": 0.200,
+    "Using a motorized skateboard (per km)": 0.030,
+    "Driving a car with a trailer (per km)": 0.300,
+    "Using a golf cart (per km)": 0.010,
+    "Using an electric scooter (per km)": 0.020,
+    "Driving a luxury SUV (per km)": 0.260,
+    "Using a hoverboard (per km)": 0.015,
+    "Taking an intercity bus (per km)": 0.110,
+    "Driving a delivery van (per km)": 0.230,
+    "Using a tram (per km)": 0.025,
+    "Driving a minibus (per km)": 0.180,
+    "Using an electric car sharing service (per km)": 0.050,
+    "Using a drone for delivery (per km)": 0.200,
+    "Using a bike-sharing service (per km)": 0.015,
+    "Using a hybrid taxi (per km)": 0.120,
+    "Using a motorized rickshaw (per km)": 0.100,
+    "Using a funicular (per km)": 0.040,
+    "Driving a fuel cell vehicle (per km)": 0.070,
+    "Driving a LNG vehicle (per km)": 0.080,
+    "Driving a CNG vehicle (per km)": 0.060,
+    "Driving a LPG vehicle (per km)": 0.050,
+    "Using a passenger ferry (per km)": 0.200,
+    "Using a high-speed train (per km)": 0.030,
+    "Using a regular train (per km)": 0.040,
+    "Using a light rail (per km)": 0.035,
+    "Using an autonomous shuttle (per km)": 0.050,
+    "Driving a refrigerated truck (per km)": 0.250,
+    "Using a hybrid freight truck (per km)": 0.150,
+    "Using an electric delivery bike (per km)": 0.010,
+    "Using a hydrogen bus (per km)": 0.070,
+    "Driving an electric truck (per km)": 0.080,
+    "Using a robotic delivery vehicle (per km)": 0.020
+
+    },
+
+    food: {
+        "Eating 1 kg of beef": 27.0,
+  "Eating 1 kg of chicken": 6.9,
+  "Eating 1 kg of pork": 12.1,
+  "Eating 1 kg of lamb": 39.2,
+  "Eating 1 kg of cheese": 13.5,
+  "Drinking 1 liter of milk": 1.2,
+  "Producing 1 kg of rice": 2.7,
+  "Eating 1 kg of potatoes": 0.4,
+  "Eating 1 kg of eggs": 4.8,
+  "Drinking 1 liter of almond milk": 0.6,
+  "Drinking 1 liter of soy milk": 0.9,
+  "Eating 1 kg of fish (farmed)": 5.0,
+  "Eating 1 kg of lentils": 0.9,
+  "Eating 1 kg of broccoli": 0.2,
+  "Drinking 1 cup of coffee": 0.02,
+  "Eating 1 kg of tofu": 3.2,
+  "Drinking 1 liter of orange juice": 0.9,
+  "Eating 1 kg of chocolate": 19.0,
+  "Eating 1 kg of avocados": 2.0,
+  "Drinking 1 liter of beer": 1.5,
+  "Eating 1 kg of bananas": 0.5,
+  "Eating 1 kg of peanuts": 2.6,
+  "Eating 1 kg of soybeans": 2.1,
+  "Eating 1 kg of apples": 0.3,
+  "Drinking 1 liter of wine": 1.2,
+  "Eating 1 kg of pasta": 1.1,
+  "Eating 1 kg of duck": 16.0,
+    "Eating 1 kg of turkey": 8.0,
+    "Eating 1 kg of lamb shank": 35.0,
+    "Eating 1 kg of venison": 14.0,
+    "Eating 1 kg of tofu stir-fry": 3.5,
+    "Eating 1 kg of quinoa": 1.2,
+    "Eating 1 kg of kale": 0.6,
+    "Eating 1 kg of mushrooms": 1.0,
+    "Eating 1 kg of spinach": 0.4,
+    "Eating 1 kg of chickpeas": 1.5,
+    "Eating 1 kg of yogurt": 1.0,
+    "Eating 1 kg of hummus": 1.8,
+    "Eating 1 kg of sauerkraut": 1.0,
+    "Eating 1 kg of tempeh": 4.0,
+    "Eating 1 kg of cauliflower": 0.5,
+    "Eating 1 kg of carrots": 0.3,
+    "Eating 1 kg of cabbage": 0.3,
+    "Eating 1 kg of tomatoes": 0.8,
+    "Eating 1 kg of blueberries": 1.0,
+    "Eating 1 kg of grapes": 1.2,
+    "Eating 1 kg of strawberries": 1.5,
+    "Eating 1 kg of raspberries": 1.8,
+    "Eating 1 kg of cherries": 2.0,
+    "Eating 1 kg of peaches": 1.2,
+    "Eating 1 kg of plums": 1.4,
+    "Eating 1 kg of pears": 1.0,
+    "Eating 1 kg of apples (organic)": 0.4,
+    "Eating 1 kg of avocados (organic)": 1.5,
+    "Eating 1 kg of nuts": 2.5,
+    "Eating 1 kg of seeds": 1.0,
+    "Eating 1 kg of olives": 0.8,
+    "Eating 1 kg of yogurt (plant-based)": 0.9,
+    "Eating 1 kg of almond butter": 2.5,
+    "Eating 1 kg of peanut butter": 3.0,
+    "Eating 1 kg of pasta (whole grain)": 1.0,
+    "Eating 1 kg of rice (brown)": 2.5,
+    "Eating 1 kg of bread (whole grain)": 1.2,
+    "Eating 1 kg of bread (white)": 1.5,
+    "Eating 1 kg of pizza": 3.0,
+    "Eating 1 kg of burgers": 2.0,
+    "Eating 1 kg of fried chicken": 4.0,
+    "Eating 1 kg of ice cream": 2.5,
+    "Eating 1 kg of chocolate (dark)": 18.0,
+    "Eating 1 kg of chocolate (milk)": 20.0,
+    "Eating 1 kg of candies": 15.0,
+    "Eating 1 kg of popcorn": 2.0,
+    "Eating 1 kg of pastries": 3.5,
+    "Eating 1 kg of cheese (vegan)": 6.0,
+    "Eating 1 kg of tofu (extra firm)": 4.0,
+    "Eating 1 kg of seitan": 4.5,
+    "Eating 1 kg of tempeh (fermented)": 3.8
+
+
+    },
+
+    household: {
+        "Heating a home with natural gas (per hour)": 1.91,
+  "Using a 60W incandescent light bulb for 1 hour": 0.042,
+  "Watching TV for 1 hour": 0.088,
+  "Using a laptop for 1 hour": 0.015,
+  "Boiling a kettle (1 time)": 0.015,
+  "Cooking with electric oven (1 hour)": 1.15,
+  "Running a washing machine (per load)": 0.6,
+  "Taking a 10-minute shower": 0.8,
+  "Using a dishwasher (per load)": 1.2,
+  "Charging an electric vehicle (per kWh)": 0.3,
+  "Running a vacuum cleaner (per hour)": 0.4,
+  "Using an electric blanket (per hour)": 0.1,
+  "Using an air conditioner (per hour)": 0.6,
+  "Using a space heater (per hour)": 0.4,
+  "Using a refrigerator (per day)": 1.0,
+  "Using a freezer (per day)": 1.5,
+  "Using a hairdryer (per use)": 0.05,
+  "Running a tumble dryer (per load)": 2.0,
+  "Using a microwave (per minute)": 0.02,
+  "Running an electric stove (per hour)": 1.2,
+  "Charging a smartphone (1 full charge)": 0.005,
+  "Using a fan (per hour)": 0.03,
+  "Running a blender (per minute)": 0.015,
+  "Using a clothes iron (per hour)": 1.2,
+  "Using a dehumidifier (per hour)": 0.5,
+  "Using a slow cooker (per hour)": 0.6,
+    "Using an electric kettle (per use)": 0.015,
+    "Using a toaster (per use)": 0.03,
+    "Using a coffee machine (per use)": 0.05,
+    "Using an electric grill (per hour)": 1.0,
+    "Using a hot water heater (per hour)": 2.0,
+    "Using a clothes dryer (per load)": 2.0,
+    "Using an oven (per hour)": 1.5,
+    "Using a dishwasher (per load)": 1.2,
+    "Using a microwave (per minute)": 0.02,
+    "Using a refrigerator (per day)": 1.0,
+    "Using a freezer (per day)": 1.5,
+    "Using a hairdryer (per use)": 0.05,
+    "Using a fan (per hour)": 0.03,
+    "Using a clothes iron (per hour)": 1.2,
+    "Using a blender (per minute)": 0.015,
+    "Using a vacuum cleaner (per hour)": 0.4,
+    "Using an air purifier (per hour)": 0.04,
+    "Using a space heater (per hour)": 0.4,
+    "Using a dehumidifier (per hour)": 0.5,
+    "Using an electric blanket (per hour)": 0.1,
+    "Using a toaster oven (per hour)": 0.6,
+    "Using a steam cleaner (per hour)": 0.5,
+    "Using a pizza oven (per hour)": 1.5,
+    "Using a slow cooker (per hour)": 0.6,
+    "Using a sous vide machine (per hour)": 0.4,
+    "Using a food processor (per minute)": 0.015,
+    "Using a popcorn maker (per use)": 0.1,
+    "Using a coffee grinder (per use)": 0.01,
+    "Using a bread maker (per hour)": 0.5,
+    "Using a waffle maker (per use)": 0.05,
+    "Using a meat grinder (per use)": 0.02,
+    "Using a rice cooker (per hour)": 0.5,
+    "Using a deep fryer (per hour)": 1.0,
+    "Using a kitchen scale (per use)": 0.01,
+    "Using a food dehydrator (per hour)": 0.3,
+    "Using an espresso machine (per use)": 0.1,
+    "Using a milk frother (per use)": 0.01,
+    "Using an electric kettle (per use)": 0.015,
+    "Using a meat thermometer (per use)": 0.005,
+    "Using a popcorn maker (per use)": 0.05,
+    "Using a milk frother (per use)": 0.02,
+    "Using a fruit juicer (per use)": 0.05,
+    "Using a nut grinder (per use)": 0.01,
+    "Using an electric can opener (per use)": 0.02,
+    "Using an ice maker (per use)": 0.03,
+    "Using an egg cooker (per use)": 0.02
+
+
+    },
+    manufacturing: {
+        "Producing 1 kg of plastic": 6.0,
+  "Producing 1 kg of steel": 2.0,
+  "Producing 1 kg of aluminum": 11.0,
+  "Producing 1 kg of cement": 0.930,
+  "Producing 1 kg of glass": 0.75,
+  "Manufacturing 1 kg of textile": 5.0,
+  "Manufacturing 1 car": 6000,
+  "Producing 1 pair of shoes": 14,
+  "Producing 1 kg of paper": 1.5,
+  "Producing 1 smartphone": 85,
+  "Manufacturing 1 computer": 300,
+  "Producing 1 kg of bricks": 0.45,
+  "Producing 1 pair of jeans": 25,
+  "Producing 1 kg of rubber": 2.4,
+  "Producing 1 kg of glass bottles": 0.8,
+  "Producing 1 car tire": 24,
+  "Producing 1 steel beam (1 meter)": 15,
+  "Producing 1 kg of fertilizer": 6.8,
+  "Producing 1 kg of paint": 4.0,
+  "Producing 1 kg of batteries": 15,
+  "Producing 1 solar panel": 50,
+  "Producing 1 wind turbine blade": 100,
+  "Producing 1 kg of copper wire": 2.5,
+  "Producing 1 kg of styrofoam": 6.0,
+  "Producing 1 kg of ceramic tiles": 0.9,
+  "Producing 1 kg of rubber": 2.4,
+    "Producing 1 kg of textiles": 5.0,
+    "Producing 1 kg of electronic components": 8.0,
+    "Producing 1 kg of batteries": 15.0,
+    "Manufacturing 1 smartphone": 85.0,
+    "Producing 1 kg of cardboard": 1.0,
+    "Producing 1 kg of paper": 1.5,
+    "Producing 1 kg of paint": 4.0,
+    "Manufacturing 1 laptop": 300.0,
+    "Manufacturing 1 tablet": 150.0,
+    "Manufacturing 1 refrigerator": 200.0,
+    "Manufacturing 1 washing machine": 100.0,
+    "Manufacturing 1 dishwasher": 120.0,
+    "Manufacturing 1 microwave": 50.0,
+    "Manufacturing 1 oven": 150.0,
+    "Manufacturing 1 air conditioner": 250.0,
+    "Manufacturing 1 TV": 80.0,
+    "Manufacturing 1 printer": 30.0,
+    "Producing 1 kg of steel beams": 3.0,
+    "Producing 1 kg of copper wire": 2.5,
+    "Producing 1 kg of solar panels": 50.0,
+    "Producing 1 kg of wind turbine blades": 100.0,
+    "Producing 1 kg of aluminum cans": 0.8,
+    "Producing 1 kg of ceramic tiles": 0.9,
+    "Producing 1 kg of fiberglass": 1.5,
+    "Manufacturing 1 bicycle": 20.0,
+    "Manufacturing 1 skateboard": 5.0,
+    "Manufacturing 1 kayak": 30.0,
+    "Manufacturing 1 surfboard": 20.0,
+    "Producing 1 kg of wool": 4.0,
+    "Producing 1 kg of leather": 15.0,
+    "Manufacturing 1 pair of shoes": 14.0,
+    "Manufacturing 1 handbag": 5.0,
+    "Manufacturing 1 suitcase": 8.0,
+    "Manufacturing 1 belt": 2.0,
+    "Manufacturing 1 pair of gloves": 1.5,
+    "Manufacturing 1 scarf": 2.0,
+    "Manufacturing 1 hat": 1.0,
+    "Manufacturing 1 coat": 10.0,
+    "Producing 1 kg of synthetic fabric": 5.0,
+    "Producing 1 kg of organic fabric": 2.0,
+    "Producing 1 kg of recycled plastic": 3.0,
+    "Manufacturing 1 electric guitar": 4.0,
+    "Manufacturing 1 drum set": 15.0,
+    "Manufacturing 1 violin": 5.0,
+    "Manufacturing 1 piano": 200.0,
+    "Manufacturing 1 camera": 30.0,
+    "Manufacturing 1 drone": 50.0,
+    "Manufacturing 1 television": 80.0,
+    "Manufacturing 1 stereo system": 60.0,
+    "Manufacturing 1 microwave oven": 50.0,
+    "Manufacturing 1 hairdryer": 5.0
+
+
+    },
+
+    environmental: {
+        "Recycling 1 kg of paper": -0.91,
+  "Planting a tree (per tree)": -0.25,
+  "Growing a Christmas tree (cutting)": 2.6,
+  "Using a wind turbine (per kWh)": 0.012,
+  "Using a solar panel (per kWh)": 0.020,
+  "Using a geothermal plant (per kWh)": 0.009,
+  "Using a hydropower plant (per kWh)": 0.015,
+  "Using a biomass heater (per hour)": 0.5,
+  "Using a nuclear power plant (per kWh)": 0.01,
+  "Recycling 1 kg of aluminum": -8.0,
+  "Recycling 1 kg of steel": -1.4,
+  "Composting 1 kg of organic waste": -0.2,
+  "Using a fusion reactor (per kWh)": 0.0,
+  "Using a tidal generator (per kWh)": 0.01,
+  "Using a wave generator (per kWh)": 0.02,
+  "Using a smart thermostat (per hour)": 0.01,
+  "Offsetting carbon footprint (per ton)": -1000,
+  "Growing organic produce (per kg)": -0.5,
+  "Producing biogas (per kWh)": -0.1,
+  "Capturing CO2 through direct air capture (per ton)": -500,
+  "Recycling plastic (per kg)": -1.7,
+  "Using geothermal energy (per kWh)": 0.02,
+  "Using a heat pump (per hour)": 0.03,
+  "Using a solar water heater (per hour)": 0.02,
+  "Recycling glass (per kg)": -0.5,
+  "Composting 1 kg of food waste": -0.5,
+    "Recycling 1 kg of plastic bottles": -1.0,
+    "Recycling 1 kg of aluminum cans": -1.5,
+    "Recycling 1 kg of glass bottles": -0.7,
+    "Recycling 1 kg of electronic waste": -2.0,
+    "Using a geothermal heating system (per kWh)": 0.015,
+    "Using hydroelectric power (per kWh)": 0.010,
+    "Recycling 1 kg of metal scrap": -1.2,
+    "Recycling 1 kg of cardboard": -0.8,
+    "Recycling 1 kg of textiles": -1.0,
+    "Recycling 1 kg of rubber tires": -1.5,
+    "Recycling 1 kg of batteries": -2.5,
+    "Planting 1 square meter of garden": -0.1,
+    "Using a rainwater harvesting system (per liter)": -0.01,
+    "Using a water-efficient toilet (per use)": -0.05,
+    "Installing energy-efficient windows (per square meter)": -0.1,
+    "Installing insulation (per square meter)": -0.2,
+    "Using an electric vehicle (per kWh)": 0.05,
+    "Using a hybrid vehicle (per kWh)": 0.03,
+    "Using a carbon offset program (per ton)": -1.0,
+    "Participating in a reforestation project (per ton)": -2.0,
+    "Participating in a clean energy project (per ton)": -3.0,
+    "Participating in a waste reduction program (per ton)": -1.5,
+    "Participating in a biodiversity conservation program (per ton)": -2.5,
+    "Recycling 1 kg of construction debris": -1.8,
+    "Recycling 1 kg of hazardous waste": -2.0,
+    "Participating in a carbon capture program (per ton)": -4.0,
+    "Using a low-flow showerhead (per use)": -0.02,
+    "Using a low-flow faucet (per use)": -0.01,
+    "Using an energy-efficient appliance (per kWh)": -0.05,
+    "Using a programmable thermostat (per month)": -0.1,
+    "Participating in a zero-waste lifestyle program (per year)": -5.0,
+    "Participating in a community recycling program (per year)": -1.0,
+    "Using a sustainable fashion product (per item)": -0.2,
+    "Using a plant-based cleaning product (per liter)": -0.1,
+    "Participating in a community garden (per square meter)": -0.2,
+    "Installing solar panels (per square meter)": -0.3,
+    "Using a green roof (per square meter)": -0.4,
+    "Participating in a green building certification program (per square meter)": -0.5,
+    "Using a composting toilet (per use)": -0.1,
+    "Using an energy-efficient lighting system (per hour)": -0.05,
+    "Using a smart thermostat (per year)": -0.6,
+    "Using a smart irrigation system (per liter)": -0.01,
+    "Participating in a carbon neutral program (per year)": -10.0,
+    "Using a low-carbon transportation method (per km)": -0.05,
+    "Using a sustainable travel program (per trip)": -2.0,
+    "Participating in a carbon footprint reduction program (per year)": -3.0,
+    "Using a renewable energy source (per kWh)": -0.02
+
+    }
+}
 let totalEmissions = 0;
 let totalPoints = 0;
 
+// Initialize Chart.js
+var ctx = document.getElementById('emissionsChart').getContext('2d');
+var emissionsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [], // Dates will be added here
+        datasets: [{
+            label: 'Points Difference from Previous Day',
+            data: [], // Differences will be added here
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Date'
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Points Difference'
+                }
+            }
+        }
+    }
+});
+
+// Populate the activity dropdown
 // Populate the activity dropdown
 var activitySelect = document.getElementById("activity");
-for (var activity in activities) {
-    var option = document.createElement("option");
-    option.value = activity;
-    option.text = activity;
-    activitySelect.add(option);
+for (var category in activities) {
+    var optgroup = document.createElement("optgroup");
+    optgroup.label = category.charAt(0).toUpperCase() + category.slice(1); // Capitalize category name
+    
+    for (var activity in activities[category]) {
+        var option = document.createElement("option");
+        option.value = category + "|" + activity; // Store both category and activity in value
+        option.text = activity;
+        optgroup.appendChild(option);
+    }
+    
+    activitySelect.appendChild(optgroup);
 }
+
 
 // Get modal element
 var modal = document.getElementById("activityModal");
@@ -1422,7 +1007,7 @@ var btn = document.getElementById("add-activity-btn");
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("close")[0];
 
-// When the user clicks the button, open the modal 
+// When the user clicks the button, open the modal
 btn.onclick = function() {
     modal.style.display = "block";
 }
@@ -1440,12 +1025,13 @@ window.onclick = function(event) {
 }
 
 // Add form submit functionality
+// Add form submit functionality
 document.getElementById("activityForm").onsubmit = function(event) {
     event.preventDefault();
-    var activity = document.getElementById("activity").value;
-    var quantity = document.getElementById("quantity").value;
-
-    var emissions = activities[activity] * quantity;
+    var selectedValue = document.getElementById("activity").value;
+    var [category, activity] = selectedValue.split("|"); // Split category and activity
+    var quantity = parseFloat(document.getElementById("quantity").value);
+    var emissions = activities[category][activity] * quantity; // Get emissions based on category and activity
 
     // Update the activity list with the new activity
     var activityList = document.getElementById("activity-list");
@@ -1468,10 +1054,186 @@ document.getElementById("activityForm").onsubmit = function(event) {
     document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
     document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
 
+    // Save the activity to Firestore
+    db.collection("activities").add({
+        category: category,
+        activity: activity,
+        quantity: quantity,
+        emissions: emissions.toFixed(2),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then((docRef) => {
+        console.log("Activity successfully added with ID: ", docRef.id);
+    })
+    .catch((error) => {
+        console.error("Error adding activity to Firestore: ", error);
+    });
+
     // Close the modal after submission
     modal.style.display = "none";
+};
 
-    };
+
+// Fetch data from Firestore and update UI
+// Fetch data from Firestore and update UI
+function fetchData() {
+    db.collection("activities").orderBy("timestamp", "asc").get().then((querySnapshot) => {
+        var dates = [];
+        var dailyTotals = {};
+
+        querySnapshot.forEach((doc) => {
+            var data = doc.data();
+            var date = new Date(data.timestamp.toDate()).toLocaleDateString();
+            var emissions = parseFloat(data.emissions);
+
+            // Aggregate emissions for each date
+            if (!dailyTotals[date]) {
+                dailyTotals[date] = 0;
+            }
+            dailyTotals[date] += emissions;
+
+            // Update activity list
+            var activityList = document.getElementById("activity-list");
+            var activityCard = document.createElement("div");
+            activityCard.className = "activity-card";
+            activityCard.innerHTML = `
+                <div class="user-pic"></div>
+                <p>User</p>
+                <p>${data.activity} (${data.category})</p>
+                <p>Quantity: ${data.quantity}</p>
+                <p>CO2 Emissions: ${data.emissions} kg</p>
+            `;
+            activityList.appendChild(activityCard);
+        });
+
+        // Process dailyTotals to compute differences
+        var sortedDates = Object.keys(dailyTotals).sort();
+        var points = [];
+        var previousPoints = 0;
+
+        sortedDates.forEach((date, index) => {
+            var currentPoints = dailyTotals[date];
+            var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
+            points.push(difference);
+            previousPoints = currentPoints;
+        });
+
+        // Update chart with differences
+        emissionsChart.data.labels = sortedDates;
+        emissionsChart.data.datasets[0].data = points;
+        emissionsChart.update();
+
+        // Update totals
+        totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
+        totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
+
+        document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
+        document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+    });
+}
+
+
+// Click event for the days
+document.addEventListener('DOMContentLoaded', (event) => {
+    const statsGrid = document.getElementById('stats-grid');
+    const badgeInfo = document.getElementById('badge-info');
+    const planList = document.getElementById('plan-list');
+
+    statsGrid.addEventListener('click', (event) => {
+        const dayElement = event.target;
+        const day = dayElement.getAttribute('data-day');
+        
+        if (day) {
+            // Remove 'active' class from all day elements
+            document.querySelectorAll('.day-item').forEach(item => item.classList.remove('active'));
+
+            // Add 'active' class to the clicked day element
+            dayElement.classList.add('active');
+
+            fetchDayData(day);
+        }
+    });
+
+    // Fetch data for a specific day and update the UI
+    function fetchDayData(day) {
+        db.collection("activities")
+            .where("day", "==", day) // Fetch data for the specific day
+            .get()
+            .then((querySnapshot) => {
+                let totalReduction = 0;
+                let planHTML = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const reduction = parseFloat(data.emissions);
+
+                    // Accumulate total reduction for the day
+                    totalReduction += reduction;
+
+                    // Create plan card HTML
+                    planHTML += `
+                        <div class="plan-card">
+                            <div style="display: flex; align-items: center;">
+                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
+                                    ${data.quantity}
+                                </div>
+                                <div style="display: inline-block; margin-left: 10px;">
+                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                    <p style="color: #5D5D5B;">${data.quantity} of ${data.totalBadges} badges earned, ${data.badgeType}</p>
+                                </div>
+                                <div style="margin-left: 55px; color: #5D5D5B;">
+                                    <p>${new Date(data.timestamp.toDate()).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Update plan list
+                planList.innerHTML = planHTML;
+
+                // Display badge info
+                badgeInfo.innerHTML = calculateBadge(totalReduction);
+            })
+            .catch((error) => {
+                console.error("Error fetching day data: ", error);
+            });
+    }
+
+    function calculateBadge(totalReduction) {
+        let badgeLevel = 0;
+        if (totalReduction >= 2.5) {
+            badgeLevel = 5;
+        } else if (totalReduction >= 2.0) {
+            badgeLevel = 4;
+        } else if (totalReduction >= 1.5) {
+            badgeLevel = 3;
+        } else if (totalReduction >= 1.0) {
+            badgeLevel = 2;
+        } else if (totalReduction >= 0.5) {
+            badgeLevel = 1;
+        }
+
+        return `
+            <div style="display: flex; align-items: center;">
+                <div style="display: flex; justify-content: center; align-items: center; background-color: #8EF913; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
+                    ${badgeLevel}
+                </div>
+                <div style="display: flex; flex-direction: column; margin-left: 10px;">
+                    <p style="font-weight: bold; margin: 0;">Badge Progress</p>
+                    <p style="color: #5D5D5B; margin: 0;">${totalReduction.toFixed(2)} kg CO2 reduction, ${badgeLevel} of 5 badges earned</p>
+                </div>
+                <div style="margin-left: 55px; color: #5D5D5B;">
+                    <p>${new Date().toLocaleDateString()}</p>
+                </div>
+            </div>
+        `;
+    }
+});
+
+// Call fetchData when the page loads
+window.onload = fetchData;
+
 
 </script>
 
