@@ -382,7 +382,11 @@
 </div>
 
 
-
+<script>
+    var userId = "{{ user_id }}";  // Pass user_id from Flask to JavaScript
+    fetchData();
+  </script>
+  
 
 <script>
     
@@ -1054,20 +1058,22 @@ document.getElementById("activityForm").onsubmit = function(event) {
     document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
     document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
 
+    const userId = "{{ user_id }}"; // This will be injected by Flask
     // Save the activity to Firestore
-    db.collection("activities").add({
-        category: category,
-        activity: activity,
-        quantity: quantity,
-        emissions: emissions.toFixed(2),
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then((docRef) => {
-        console.log("Activity successfully added with ID: ", docRef.id);
-    })
-    .catch((error) => {
-        console.error("Error adding activity to Firestore: ", error);
-    });
+db.collection("users").doc(userId).collection("activities").add({
+    category: category,
+    activity: activity,
+    quantity: quantity,
+    emissions: emissions.toFixed(2),
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+})
+.then((docRef) => {
+    console.log("Activity successfully added with ID: ", docRef.id);
+})
+.catch((error) => {
+    console.error("Error adding activity to Firestore: ", error);
+});
+
 
     // Close the modal after submission
     modal.style.display = "none";
@@ -1077,60 +1083,75 @@ document.getElementById("activityForm").onsubmit = function(event) {
 // Fetch data from Firestore and update UI
 // Fetch data from Firestore and update UI
 function fetchData() {
-    db.collection("activities").orderBy("timestamp", "asc").get().then((querySnapshot) => {
-        var dates = [];
-        var dailyTotals = {};
+    console.log("Fetching data for user ID: ", userId);
 
-        querySnapshot.forEach((doc) => {
-            var data = doc.data();
-            var date = new Date(data.timestamp.toDate()).toLocaleDateString();
-            var emissions = parseFloat(data.emissions);
-
-            // Aggregate emissions for each date
-            if (!dailyTotals[date]) {
-                dailyTotals[date] = 0;
+    db.collection("users").doc(userId).collection("activities")
+        .orderBy("timestamp", "asc")
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                console.log("No matching documents.");
+                return;
             }
-            dailyTotals[date] += emissions;
 
-            // Update activity list
-            var activityList = document.getElementById("activity-list");
-            var activityCard = document.createElement("div");
-            activityCard.className = "activity-card";
-            activityCard.innerHTML = `
-                <div class="user-pic"></div>
-                <p>User</p>
-                <p>${data.activity} (${data.category})</p>
-                <p>Quantity: ${data.quantity}</p>
-                <p>CO2 Emissions: ${data.emissions} kg</p>
-            `;
-            activityList.appendChild(activityCard);
+            var dates = [];
+            var dailyTotals = {};
+
+            querySnapshot.forEach((doc) => {
+                var data = doc.data();
+                console.log("Document data: ", data);  // Log document data
+                var date = new Date(data.timestamp.toDate()).toLocaleDateString();
+                var emissions = parseFloat(data.emissions);
+
+                // Aggregate emissions for each date
+                if (!dailyTotals[date]) {
+                    dailyTotals[date] = 0;
+                }
+                dailyTotals[date] += emissions;
+
+                // Update activity list
+                var activityList = document.getElementById("activity-list");
+                var activityCard = document.createElement("div");
+                activityCard.className = "activity-card";
+                activityCard.innerHTML = `
+                    <div class="user-pic"></div>
+                    <p>User</p>
+                    <p>${data.activity} (${data.category})</p>
+                    <p>Quantity: ${data.quantity}</p>
+                    <p>CO2 Emissions: ${data.emissions} kg</p>
+                `;
+                activityList.appendChild(activityCard);
+            });
+
+            // Process dailyTotals to compute differences
+            var sortedDates = Object.keys(dailyTotals).sort();
+            var points = [];
+            var previousPoints = 0;
+
+            sortedDates.forEach((date, index) => {
+                var currentPoints = dailyTotals[date];
+                var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
+                points.push(difference);
+                previousPoints = currentPoints;
+            });
+
+            // Update chart with differences
+            emissionsChart.data.labels = sortedDates;
+            emissionsChart.data.datasets[0].data = points;
+            emissionsChart.update();
+
+            // Update totals
+            var totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
+            var totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
+
+            document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
+            document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+        })
+        .catch((error) => {
+            console.error("Error fetching activities: ", error);
         });
-
-        // Process dailyTotals to compute differences
-        var sortedDates = Object.keys(dailyTotals).sort();
-        var points = [];
-        var previousPoints = 0;
-
-        sortedDates.forEach((date, index) => {
-            var currentPoints = dailyTotals[date];
-            var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
-            points.push(difference);
-            previousPoints = currentPoints;
-        });
-
-        // Update chart with differences
-        emissionsChart.data.labels = sortedDates;
-        emissionsChart.data.datasets[0].data = points;
-        emissionsChart.update();
-
-        // Update totals
-        totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
-        totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
-
-        document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
-        document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
-    });
 }
+
 
 
 // Click event for the days

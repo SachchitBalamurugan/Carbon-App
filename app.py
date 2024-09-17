@@ -42,15 +42,36 @@ def logout():
     session.pop('user')
     return redirect('/')
 
+# @app.route('/dashboard')
+# def dashboard():
+#     if 'user' not in session:
+#         return redirect('/')
+    
+#     email = session['user']
+#     username = email.split('@')[0]  # Strip off anything after '@'
+    
+#     return render_template('dashboard.html', username=username)
+
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
         return redirect('/')
-    
+
     email = session['user']
     username = email.split('@')[0]  # Strip off anything after '@'
-    
-    return render_template('dashboard.html', username=username)
+
+    try:
+        id_token = session.get('id_token')
+        if not id_token:
+            return "ID token not found."
+
+        # Fetch user info using ID token
+        user_info = auth.get_account_info(id_token)
+        user_id = user_info['users'][0]['localId']
+    except Exception as e:
+        return f"Failed to fetch user ID. Error: {str(e)}"
+
+    return render_template('dashboard.html', username=username, user_id=user_id)
 
 # @app.route('/dashboard')
 # def dashboard():
