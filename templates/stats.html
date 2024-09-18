@@ -295,9 +295,9 @@ button:hover {
                 </div>
                 <div style="display: flex; justify-content: space-between; gap: 20px;">
                     <div class="activities" style="flex: 1;">
+                        <h2 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
                         <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
-                        <h3 style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">9% decrease in</h3>
-                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3>
+                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous day</h3>
                     </div>
                     <div class="activities" style="flex: 1;">
                         <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total CO2 emissions saved</h3>
@@ -327,6 +327,65 @@ button:hover {
     document.addEventListener('DOMContentLoaded', () => {
     // Initialize Chart.js
     const ctx = document.getElementById('myBarChart').getContext('2d');
+    //percent decrease
+    function fetchEmissionsData(currentDay, previousDay) {
+    var userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+
+    // Firestore references
+    const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+
+    // Query emissions for the current day
+    let currentDayEmissions = 0;
+    let previousDayEmissions = 0;
+
+    db.collection("users").doc(userId).collection("activities").where("day", "==", currentDay).get()
+        .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let emissions = parseFloat(data.emissions);
+                let quantity = parseFloat(data.quantity);
+
+                if (!isNaN(emissions) && !isNaN(quantity)) {
+                    currentDayEmissions += emissions * quantity;
+                }
+            });
+
+            // Query emissions for the previous day
+            return userActivitiesRef.where("day", "==", previousDay).get();
+        })
+        .then((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let emissions = parseFloat(data.emissions);
+                let quantity = parseFloat(data.quantity);
+
+                if (!isNaN(emissions) && !isNaN(quantity)) {
+                    previousDayEmissions += emissions * quantity;
+                }
+            });
+
+            // Calculate the percent decrease
+            let percentDecrease = 0;
+            if (previousDayEmissions > 0) {
+                percentDecrease = ((previousDayEmissions - currentDayEmissions) / previousDayEmissions) * 100;
+            }
+
+           // Update the HTML with the percent decrease and make it bold
+document.querySelector("h3").innerHTML = `<strong>${percentDecrease.toFixed(2)}%</strong> decrease in`;
+
+
+        })
+        .catch((error) => {
+            console.error("Error fetching emissions data: ", error);
+        });
+}
+
+// Example usage
+const currentDay = new Date().toLocaleDateString(); // Get current day
+const previousDay = new Date();
+previousDay.setDate(previousDay.getDate() - 1); // Get previous day
+
+fetchEmissionsData(currentDay, previousDay.toLocaleDateString());
     let myBarChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -379,53 +438,58 @@ button:hover {
             }
         }
     });
+    var userId = "{{ user_id }}";
 
     // Fetch data from Firestore and update chart
-    db.collection('activities').get().then((querySnapshot) => {
-        if (querySnapshot.empty) {
-            console.log('No matching documents.');
-        } else {
-            let emissionsData = {
-                transportation: 0,
-                food: 0,
-                household: 0,
-                manufacturing: 0,
-                environmental: 0,
-                total: 0
-            };
+            db.collection("users").doc(userId).collection("activities").get().then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    console.log('No matching documents.');
+                } else {
+                    let emissionsData = {
+                        transportation: 0,
+                        food: 0,
+                        household: 0,
+                        manufacturing: 0,
+                        environmental: 0,
+                        total: 0
+                    };
 
-            querySnapshot.forEach((doc) => {
-                let data = doc.data();
-                let category = data.category;
-                let emissions = parseFloat(data.emissions); // Convert to number
-                let quantity = parseFloat(data.quantity); // Convert to number
+                    querySnapshot.forEach((doc) => {
+                        let data = doc.data();
+                        let category = data.category;
+                        let emissions = parseFloat(data.emissions); // Convert to number
+                        let quantity = parseFloat(data.quantity); // Convert to number
 
-                if (!isNaN(emissions) && !isNaN(quantity)) {
-                    let totalEmissions = emissions * quantity;
-                    if (emissionsData.hasOwnProperty(category)) {
-                        emissionsData[category] += totalEmissions;
-                    }
-                    emissionsData.total += totalEmissions;
+                        if (!isNaN(emissions) && !isNaN(quantity)) {
+                            let totalEmissions = emissions * quantity;
+                            if (emissionsData.hasOwnProperty(category)) {
+                                emissionsData[category] += totalEmissions;
+                            }
+                            emissionsData.total += totalEmissions;
+                        }
+                    });
+
+                    console.log('Emissions data:', emissionsData); // Log the calculated emissions data
+
+                    // Update chart data
+                    myBarChart.data.datasets[0].data = [
+                        emissionsData.transportation/10,
+                        emissionsData.food/10,
+                        emissionsData.household/10,
+                        emissionsData.manufacturing/10,
+                        emissionsData.environmental/10,
+                        emissionsData.total/10
+                    ];
+                    myBarChart.update();
                 }
+            }).catch((error) => {
+                console.error("Error getting documents: ", error);
             });
 
-            console.log('Emissions data:', emissionsData); // Log the calculated emissions data
-
-            // Update chart data
-            myBarChart.data.datasets[0].data = [
-                emissionsData.transportation,
-                emissionsData.food,
-                emissionsData.household,
-                emissionsData.manufacturing,
-                emissionsData.environmental,
-                emissionsData.total
-            ];
-            myBarChart.update();
-        }
-    }).catch((error) => {
-        console.error("Error getting documents: ", error);
-    });
 });
+
+
+
 
 </script>
 
@@ -576,7 +640,13 @@ button:hover {
                     </div>
                     <button style="background-color: #000000; width: 100%;">View all announcements</button>
                 </div>
-                <div style="display: flex; justify-content: space-between; gap: 20px;">
+                
+                
+                <div id="event-list">
+                    <!-- Event data will be populated here -->
+                </div>
+                
+                <!-- <div style="display: flex; justify-content: space-between; gap: 20px;">
                     <div class="activities2" style="flex: 1;">
                         <div>
                             <h3 style="margin-bottom: 17px; font-size: 20px; color: #333333; font-weight: 300;">Recent Eco-Activities</h3>
@@ -597,9 +667,112 @@ button:hover {
                             <button style="background-color: #8EF913; font-size: 16px; font-weight: bold;">View all eco-tasks</button>
                         </div>                        
                     </div>          
-                </div>
+                </div> -->
+                 <!-- Button to trigger the AI response -->
+    <button id="getAiResponse">Get AI Reccomendations to reduce emmissions</button>
+
+    <!-- Div to display the AI response -->
+    <div id="aiResponse" style="width: 100%; height: 300px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; overflow-y: auto; font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+        <!-- AI response will be displayed here -->
+    </div>
+
+                
             </div>
         </div>
+          
+    <!-- Include your JavaScript code -->
+    <script>
+        document.getElementById('getAiResponse').addEventListener('click', async function() {
+            try {
+                // Collect emissions and activities data
+                const { emissionsData, activities } = await fetchEmissionsData();
+    
+                // Construct the prompt using emissions data and activities
+                let activitiesList = activities.map(activity => {
+                    return `${activity.activity} - ${activity.quantity} units, ${activity.emissions.toFixed(2)} kg CO2`;
+                }).join('\n');
+    
+                const userInput = `I am trying to reduce fuel. My emissions data is as follows: 
+                    ${activitiesList}
+                    Total CO2 emissions: ${emissionsData.total.toFixed(2)} kg. What do I do?`;
+    
+                const response = await fetch('/get_ai_advice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_input: userInput })
+                });
+    
+                // Check if the response is ok
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+    
+                const data = await response.json();
+                console.log('AI Response:', data.response);
+                document.getElementById('aiResponse').textContent = data.response;
+    
+            } catch (error) {
+                console.error('Error fetching AI response:', error);
+                document.getElementById('aiResponse').textContent = "An error occurred while fetching AI response.";
+            }
+        });
+    
+        async function fetchEmissionsData() {
+            var userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+            
+            let emissionsData = {
+                transportation: 0,
+                food: 0,
+                household: 0,
+                manufacturing: 0,
+                environmental: 0,
+                total: 0
+            };
+            
+            let activities = []; // To hold activity data
+    
+            const querySnapshot = await userActivitiesRef.get();
+            if (querySnapshot.empty) {
+                console.log('No matching documents.');
+                return { emissionsData, activities };
+            }
+    
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let category = data.category;
+                let emissions = parseFloat(data.emissions); // Convert to number
+                let quantity = parseFloat(data.quantity); // Convert to number
+    
+                // Store each activity
+                activities.push({
+                    activity: data.activity,
+                    category: category,
+                    emissions: emissions,
+                    quantity: quantity
+                });
+    
+                if (!isNaN(emissions) && !isNaN(quantity)) {
+                    let totalEmissions = emissions * quantity;
+                    if (emissionsData.hasOwnProperty(category)) {
+                        emissionsData[category] += totalEmissions;
+                    }
+                    emissionsData.total += totalEmissions;
+                }
+            });
+    
+            return { emissionsData, activities };
+        }
+    
+        // Existing code for chart initialization and fetching data remains unchanged...
+    </script>
+    
+
+    
+
+
     </div>
 </body>
 </html>

@@ -1,8 +1,81 @@
-from flask import Flask, render_template, session, request, redirect
+from flask import Flask, render_template, session, request, redirect, jsonify
 import pyrebase
+import google.generativeai as genai
 
 app = Flask(__name__)
 
+def get_activities_data(user_id):
+    db = firebase.database()
+    activities_ref = db.child("users").child(user_id).child("activities")
+    activities = activities_ref.get()
+    
+    activity_list = []
+    for activity in activities.each():
+        data = activity.val()
+        activity_list.append(data)
+    
+    return activity_list
+
+
+def get_ai_response(prompt):
+    api_key = "AIzaSyDKkSMAEHiDUgYx3gwyLbbmhsQaflxSGrI"
+    genai.configure(api_key=api_key)
+
+    generation_config = {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "max_output_tokens": 8192,
+        "response_mime_type": "text/plain",
+    }
+
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-flash",
+        generation_config=generation_config
+    )
+
+    chat_session = model.start_chat(
+        history=[]
+    )
+
+    response = chat_session.send_message(prompt)
+    return response.text
+
+@app.route('/get_ai_advice', methods=['POST'])
+def get_ai_advice():
+    if 'user' not in session:
+        return jsonify({'response': 'User not logged in.'}), 401
+
+    data = request.get_json()
+    user_input = data.get('user_input')
+
+    if not user_input:
+        return jsonify({'response': 'No input provided.'}), 400
+
+    try:
+        ai_response = get_ai_response(user_input)
+        return jsonify({'response': ai_response})
+    except Exception as e:
+        return jsonify({'response': f"Error occurred: {str(e)}"}), 500
+
+@app.route('/get_user_activities', methods=['GET'])
+def get_user_activities():
+    if 'user' not in session:
+        return jsonify({'response': 'User not logged in.'}), 401
+
+    user_id = session.get('user_id')  # Get the user ID from the session
+
+    try:
+        # Fetch activities data for the user
+        activities = get_activities_data(user_id)
+
+        if not activities:
+            return jsonify({'activities': []})  # Return empty list if no activities found
+
+        return jsonify({'activities': activities})
+
+    except Exception as e:
+        return jsonify({'response': f"Error occurred while fetching activities: {str(e)}"}), 500
 
 config = {
     "apiKey": "AIzaSyBT1NH-JfDLGx-UwhX3_JiEx_s1uNNtl-8",
@@ -19,6 +92,7 @@ firebase = pyrebase.initialize_app(config)
 auth = firebase.auth()
 
 app.secret_key = "secert" #change later
+
 
 @app.route('/', methods=['GET', 'POST'])
 def complete_profile():
@@ -131,7 +205,9 @@ def signup():
 
 @app.route('/statistics')
 def stats():
-    return render_template('stats.html')
+    user_id = session.get('user_id')  # Retrieve the user ID from the session
+
+    return render_template('stats.html', user_id = user_id)
 
 
 
