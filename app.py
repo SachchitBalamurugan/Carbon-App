@@ -31,6 +31,9 @@ def complete_profile():
         try:
             user = auth.sign_in_with_email_and_password(email, password)
             session['user'] = email
+            session['user_id'] = user['localId']  # Store the user ID in the session
+            session['id_token'] = user['idToken']  # Optionally store the idToken if needed
+
         except:
             return "Login failed. Check your email and password."
 
@@ -42,36 +45,40 @@ def logout():
     session.pop('user')
     return redirect('/')
 
-# @app.route('/dashboard')
-# def dashboard():
-#     if 'user' not in session:
-#         return redirect('/')
-    
-#     email = session['user']
-#     username = email.split('@')[0]  # Strip off anything after '@'
-    
-#     return render_template('dashboard.html', username=username)
-
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
         return redirect('/')
-
+    
     email = session['user']
+    user_id = session.get('user_id')  # Retrieve the user ID from the session
+    
     username = email.split('@')[0]  # Strip off anything after '@'
+    
+    return render_template('dashboard.html', username=username, user_id = user_id)
 
-    try:
-        id_token = session.get('id_token')
-        if not id_token:
-            return "ID token not found."
 
-        # Fetch user info using ID token
-        user_info = auth.get_account_info(id_token)
-        user_id = user_info['users'][0]['localId']
-    except Exception as e:
-        return f"Failed to fetch user ID. Error: {str(e)}"
+#CHECK THIS
+# @app.route('/dashboard')
+# def dashboard():
+#     if 'user' not in session:
+#         return redirect('/')
 
-    return render_template('dashboard.html', username=username, user_id=user_id)
+#     email = session['user']
+#     username = email.split('@')[0]  # Strip off anything after '@'
+
+#     try:
+#         id_token = session.get('id_token')
+#         if not id_token:
+#             return "ID token not found."
+
+#         # Fetch user info using ID token
+#         user_info = auth.get_account_info(id_token)
+#         user_id = user_info['users'][0]['localId']
+#     except Exception as e:
+#         return f"Failed to fetch user ID. Error: {str(e)}"
+
+#     return render_template('dashboard.html', username=username, user_id=user_id)
 
 # @app.route('/dashboard')
 # def dashboard():
@@ -99,6 +106,9 @@ def settings():
 @app.route('/register', methods=['POST'])
 def register():
     email = request.form.get('email')
+    
+        
+
     password = request.form.get('password')
     
     try:
@@ -107,6 +117,8 @@ def register():
         
         # Automatically log in the user after registration
         session['user'] = email
+        session['user_id'] = user['localId']  # Store the user ID in the session
+        session['id_token'] = user['idToken']  # Optionally store the idToken if needed
         return redirect('/dashboard')
     except Exception as e:
         return f"Registration failed. Please try again. Error: {str(e)}"

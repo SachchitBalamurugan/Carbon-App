@@ -25,8 +25,16 @@ password = '123456'
 user = auth.sign_in_with_email_and_password(email, password)
 
 #Get Account Info of signed in account
-# info = auth.get_account_info(user["idToken"])
-# print(info)
+info = auth.get_account_info(user["idToken"])
+print(info)
+
+user_info = info['users'][0]  # Grab the first user info from the list
+user_id = user_info['localId']
+email = user_info['email']
+email_verified = user_info['emailVerified']
+creation_time = user_info['createdAt']
+
+print(user_id)
 
 #email Verification
 # auth.send_email_verification(user["idToken"])

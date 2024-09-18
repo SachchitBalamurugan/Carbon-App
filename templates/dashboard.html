@@ -307,7 +307,7 @@
             <input type="text" placeholder="Search activities, goals, and tips">
             <div class="profile">
                 <div style="margin-right: 10px;" class="profile-pic"></div>
-                <p>{{username}}</p>
+                <p>{{user_id}}</p>
             </div>
         </header>
         <div class="content">
@@ -382,11 +382,7 @@
 </div>
 
 
-<script>
-    var userId = "{{ user_id }}";  // Pass user_id from Flask to JavaScript
-    fetchData();
-  </script>
-  
+
 
 <script>
     
@@ -1057,24 +1053,26 @@ document.getElementById("activityForm").onsubmit = function(event) {
     // Update the displayed totals
     document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
     document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+    var userId = "{{ user_id }}";  // Pass user ID from Flask to your JS
 
-    const userId = "{{ user_id }}"; // This will be injected by Flask
     // Save the activity to Firestore
-db.collection("users").doc(userId).collection("activities").add({
-    category: category,
-    activity: activity,
-    quantity: quantity,
-    emissions: emissions.toFixed(2),
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-})
-.then((docRef) => {
-    console.log("Activity successfully added with ID: ", docRef.id);
-})
-.catch((error) => {
-    console.error("Error adding activity to Firestore: ", error);
-});
+    db.collection("users").doc(userId).collection("activities").add({
+            category: category,
+            activity: activity,
+            quantity: quantity,
+            emissions: emissions.toFixed(2),
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then((docRef) => {
+        console.log("Activity successfully added with ID: ", docRef.id);
+        console.log("Activity saved successfully under user:", userId);
 
-
+    })
+    .catch((error) => {
+        console.error("Error adding activity to Firestore: ", error);
+        console.error("Error saving activity: ", error);
+    });
+    
     // Close the modal after submission
     modal.style.display = "none";
 };
@@ -1083,75 +1081,63 @@ db.collection("users").doc(userId).collection("activities").add({
 // Fetch data from Firestore and update UI
 // Fetch data from Firestore and update UI
 function fetchData() {
-    console.log("Fetching data for user ID: ", userId);
+    // Get the current user's ID (assuming it's stored globally or passed to this function)
+    var userId = "{{ user_id }}";  // Ensure userId is passed from Flask to JavaScript
 
-    db.collection("users").doc(userId).collection("activities")
-        .orderBy("timestamp", "asc")
-        .get()
-        .then((querySnapshot) => {
-            if (querySnapshot.empty) {
-                console.log("No matching documents.");
-                return;
+    // Query the user's activities from Firestore
+    db.collection("users").doc(userId).collection("activities").orderBy("timestamp", "asc").get().then((querySnapshot) => {
+        var dates = [];
+        var dailyTotals = {};
+
+        querySnapshot.forEach((doc) => {
+            var data = doc.data();
+            var date = new Date(data.timestamp.toDate()).toLocaleDateString();
+            var emissions = parseFloat(data.emissions);
+
+            // Aggregate emissions for each date
+            if (!dailyTotals[date]) {
+                dailyTotals[date] = 0;
             }
+            dailyTotals[date] += emissions;
 
-            var dates = [];
-            var dailyTotals = {};
-
-            querySnapshot.forEach((doc) => {
-                var data = doc.data();
-                console.log("Document data: ", data);  // Log document data
-                var date = new Date(data.timestamp.toDate()).toLocaleDateString();
-                var emissions = parseFloat(data.emissions);
-
-                // Aggregate emissions for each date
-                if (!dailyTotals[date]) {
-                    dailyTotals[date] = 0;
-                }
-                dailyTotals[date] += emissions;
-
-                // Update activity list
-                var activityList = document.getElementById("activity-list");
-                var activityCard = document.createElement("div");
-                activityCard.className = "activity-card";
-                activityCard.innerHTML = `
-                    <div class="user-pic"></div>
-                    <p>User</p>
-                    <p>${data.activity} (${data.category})</p>
-                    <p>Quantity: ${data.quantity}</p>
-                    <p>CO2 Emissions: ${data.emissions} kg</p>
-                `;
-                activityList.appendChild(activityCard);
-            });
-
-            // Process dailyTotals to compute differences
-            var sortedDates = Object.keys(dailyTotals).sort();
-            var points = [];
-            var previousPoints = 0;
-
-            sortedDates.forEach((date, index) => {
-                var currentPoints = dailyTotals[date];
-                var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
-                points.push(difference);
-                previousPoints = currentPoints;
-            });
-
-            // Update chart with differences
-            emissionsChart.data.labels = sortedDates;
-            emissionsChart.data.datasets[0].data = points;
-            emissionsChart.update();
-
-            // Update totals
-            var totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
-            var totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
-
-            document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
-            document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
-        })
-        .catch((error) => {
-            console.error("Error fetching activities: ", error);
+            // Update activity list
+            var activityList = document.getElementById("activity-list");
+            var activityCard = document.createElement("div");
+            activityCard.className = "activity-card";
+            activityCard.innerHTML = `
+                <div class="user-pic"></div>
+                <p>${data.activity} (${data.category})</p>
+                <p>Quantity: ${data.quantity}</p>
+                <p>CO2 Emissions: ${data.emissions} kg</p>
+            `;
+            activityList.appendChild(activityCard);
         });
-}
 
+        // Process dailyTotals to compute differences
+        var sortedDates = Object.keys(dailyTotals).sort();
+        var points = [];
+        var previousPoints = 0;
+
+        sortedDates.forEach((date, index) => {
+            var currentPoints = dailyTotals[date];
+            var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
+            points.push(difference);
+            previousPoints = currentPoints;
+        });
+
+        // Update chart with differences
+        emissionsChart.data.labels = sortedDates;
+        emissionsChart.data.datasets[0].data = points;
+        emissionsChart.update();
+
+        // Update totals
+        var totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
+        var totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
+
+        document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
+        document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+    });
+}
 
 
 // Click event for the days
@@ -1177,79 +1163,82 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // Fetch data for a specific day and update the UI
     function fetchDayData(day) {
-        db.collection("activities")
-            .where("day", "==", day) // Fetch data for the specific day
-            .get()
-            .then((querySnapshot) => {
-                let totalReduction = 0;
-                let planHTML = '';
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const reduction = parseFloat(data.emissions);
+    var userId = "{{ user_id }}";  // Ensure this variable is correctly set in your template
 
-                    // Accumulate total reduction for the day
-                    totalReduction += reduction;
+    db.collection("users").doc(userId).collection("activities")
+        .where("day", "==", day)  // Fetch data for the specific day
+        .get()
+        .then((querySnapshot) => {
+            let totalReduction = 0;
+            let planHTML = '';
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const reduction = parseFloat(data.emissions);
 
-                    // Create plan card HTML
-                    planHTML += `
-                        <div class="plan-card">
-                            <div style="display: flex; align-items: center;">
-                                <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
-                                    ${data.quantity}
-                                </div>
-                                <div style="display: inline-block; margin-left: 10px;">
-                                    <p style="font-weight: bold;">Carbon footprint reduction</p>
-                                    <p style="color: #5D5D5B;">${data.quantity} of ${data.totalBadges} badges earned, ${data.badgeType}</p>
-                                </div>
-                                <div style="margin-left: 55px; color: #5D5D5B;">
-                                    <p>${new Date(data.timestamp.toDate()).toLocaleDateString()}</p>
-                                </div>
+                // Accumulate total reduction for the day
+                totalReduction += reduction;
+
+                // Create plan card HTML
+                planHTML += `
+                    <div class="plan-card">
+                        <div style="display: flex; align-items: center;">
+                            <div style="display: inline-flex; justify-content: center; background-color: #8EF913; align-items: center; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
+                                ${data.quantity}
+                            </div>
+                            <div style="display: inline-block; margin-left: 10px;">
+                                <p style="font-weight: bold;">Carbon footprint reduction</p>
+                                <p style="color: #5D5D5B;">${data.quantity} of ${data.totalBadges} badges earned, ${data.badgeType}</p>
+                            </div>
+                            <div style="margin-left: 55px; color: #5D5D5B;">
+                                <p>${new Date(data.timestamp.toDate()).toLocaleDateString()}</p>
                             </div>
                         </div>
-                    `;
-                });
-
-                // Update plan list
-                planList.innerHTML = planHTML;
-
-                // Display badge info
-                badgeInfo.innerHTML = calculateBadge(totalReduction);
-            })
-            .catch((error) => {
-                console.error("Error fetching day data: ", error);
+                    </div>
+                `;
             });
+
+            // Update plan list
+            document.getElementById("plan-list").innerHTML = planHTML;
+
+            // Display badge info
+            document.getElementById("badge-info").innerHTML = calculateBadge(totalReduction);
+        })
+        .catch((error) => {
+            console.error("Error fetching day data: ", error);
+        });
+}
+
+function calculateBadge(totalReduction) {
+    let badgeLevel = 0;
+    if (totalReduction >= 2.5) {
+        badgeLevel = 5;
+    } else if (totalReduction >= 2.0) {
+        badgeLevel = 4;
+    } else if (totalReduction >= 1.5) {
+        badgeLevel = 3;
+    } else if (totalReduction >= 1.0) {
+        badgeLevel = 2;
+    } else if (totalReduction >= 0.5) {
+        badgeLevel = 1;
     }
 
-    function calculateBadge(totalReduction) {
-        let badgeLevel = 0;
-        if (totalReduction >= 2.5) {
-            badgeLevel = 5;
-        } else if (totalReduction >= 2.0) {
-            badgeLevel = 4;
-        } else if (totalReduction >= 1.5) {
-            badgeLevel = 3;
-        } else if (totalReduction >= 1.0) {
-            badgeLevel = 2;
-        } else if (totalReduction >= 0.5) {
-            badgeLevel = 1;
-        }
-
-        return `
-            <div style="display: flex; align-items: center;">
-                <div style="display: flex; justify-content: center; align-items: center; background-color: #8EF913; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
-                    ${badgeLevel}
-                </div>
-                <div style="display: flex; flex-direction: column; margin-left: 10px;">
-                    <p style="font-weight: bold; margin: 0;">Badge Progress</p>
-                    <p style="color: #5D5D5B; margin: 0;">${totalReduction.toFixed(2)} kg CO2 reduction, ${badgeLevel} of 5 badges earned</p>
-                </div>
-                <div style="margin-left: 55px; color: #5D5D5B;">
-                    <p>${new Date().toLocaleDateString()}</p>
-                </div>
+    return `
+        <div style="display: flex; align-items: center;">
+            <div style="display: flex; justify-content: center; align-items: center; background-color: #8EF913; width: 50px; height: 50px; border-radius: 50%; font-weight: bold;">
+                ${badgeLevel}
             </div>
-        `;
-    }
+            <div style="display: flex; flex-direction: column; margin-left: 10px;">
+                <p style="font-weight: bold; margin: 0;">Badge Progress</p>
+                <p style="color: #5D5D5B; margin: 0;">${totalReduction.toFixed(2)} kg CO2 reduction, ${badgeLevel} of 5 badges earned</p>
+            </div>
+            <div style="margin-left: 55px; color: #5D5D5B;">
+                <p>${new Date().toLocaleDateString()}</p>
+            </div>
+        </div>
+    `;
+}
+
 });
 
 // Call fetchData when the page loads
