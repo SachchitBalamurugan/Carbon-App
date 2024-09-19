@@ -206,7 +206,7 @@ def signup():
 @app.route('/statistics')
 def stats():
     user_id = session.get('user_id')  # Retrieve the user ID from the session
-
+    
     return render_template('stats.html', user_id = user_id)
 
 

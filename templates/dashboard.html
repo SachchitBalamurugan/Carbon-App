@@ -308,6 +308,8 @@
             <div class="profile">
                 <div style="margin-right: 10px;" class="profile-pic"></div>
                 <p>{{username}}</p>
+                <button onclick="window.location.href='/logout'">Logout</button>
+
             </div>
         </header>
         <div class="content">
@@ -1047,7 +1049,7 @@ document.getElementById("activityForm").onsubmit = function(event) {
     activityList.appendChild(newActivityCard);
 
     // Update totals
-    totalEmissions += emissions;
+    totalEmissions += emissions ;
     totalPoints += emissions; // Assuming 1 kg CO2 = 1 point
 
     // Update the displayed totals
@@ -1080,6 +1082,65 @@ document.getElementById("activityForm").onsubmit = function(event) {
 
 // Fetch data from Firestore and update UI
 // Fetch data from Firestore and update UI
+// function fetchData() {
+//     // Get the current user's ID (assuming it's stored globally or passed to this function)
+//     var userId = "{{ user_id }}";  // Ensure userId is passed from Flask to JavaScript
+    
+//     // Query the user's activities from Firestore
+//     db.collection("users").doc(userId).collection("activities").orderBy("timestamp", "asc").get().then((querySnapshot) => {
+//         var dates = [];
+//         var dailyTotals = {};
+
+//         querySnapshot.forEach((doc) => {
+//             var data = doc.data();
+//             var date = new Date(data.timestamp.toDate()).toLocaleDateString();
+//             var emissions = parseFloat(data.emissions);
+
+//             // Aggregate emissions for each date
+//             if (!dailyTotals[date]) {
+//                 dailyTotals[date] = 0;
+//             }
+//             dailyTotals[date] += emissions;
+
+//             // Update activity list
+//             var activityList = document.getElementById("activity-list");
+//             var activityCard = document.createElement("div");
+//             activityCard.className = "activity-card";
+//             activityCard.innerHTML = `
+//                 <div class="user-pic"></div>
+//                 <p>${data.activity} (${data.category})</p>
+//                 <p>Quantity: ${data.quantity}</p>
+//                 <p>CO2 Emissions: ${data.emissions} kg</p>
+//             `;
+//             activityList.appendChild(activityCard);
+//         });
+
+//         // Process dailyTotals to compute differences
+//         var sortedDates = Object.keys(dailyTotals).sort();
+//         var points = [];
+//         var previousPoints = 0;
+
+//         sortedDates.forEach((date, index) => {
+//             var currentPoints = dailyTotals[date];
+//             var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
+//             points.push(difference);
+//             previousPoints = currentPoints;
+//         });
+
+//         // Update chart with differences
+//         emissionsChart.data.labels = sortedDates;
+//         emissionsChart.data.datasets[0].data = points;
+//         emissionsChart.update();
+
+//         // Update totals
+//         var totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
+//         var totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
+
+//         document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
+//         document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+//     });
+// }
+
 function fetchData() {
     // Get the current user's ID (assuming it's stored globally or passed to this function)
     var userId = "{{ user_id }}";  // Ensure userId is passed from Flask to JavaScript
@@ -1088,41 +1149,49 @@ function fetchData() {
     db.collection("users").doc(userId).collection("activities").orderBy("timestamp", "asc").get().then((querySnapshot) => {
         var dates = [];
         var dailyTotals = {};
+        var totalEmissions = 0;
 
         querySnapshot.forEach((doc) => {
             var data = doc.data();
             var date = new Date(data.timestamp.toDate()).toLocaleDateString();
             var emissions = parseFloat(data.emissions);
+            var quantity = parseFloat(data.quantity);
 
-            // Aggregate emissions for each date
-            if (!dailyTotals[date]) {
-                dailyTotals[date] = 0;
+            // Calculate total emissions for this entry
+            if (!isNaN(emissions) && !isNaN(quantity)) {
+                var totalForEntry = emissions * quantity;
+                totalEmissions += totalForEntry;
+                
+                // Aggregate emissions for each date
+                if (!dailyTotals[date]) {
+                    dailyTotals[date] = 0;
+                }
+                dailyTotals[date] += totalForEntry;
+                
+                // Update activity list
+                var activityList = document.getElementById("activity-list");
+                var activityCard = document.createElement("div");
+                activityCard.className = "activity-card";
+                activityCard.innerHTML = `
+                    <div class="user-pic"></div>
+                    <p>${data.activity} (${data.category})</p>
+                    <p>Quantity: ${data.quantity}</p>
+                    <p>CO2 Emissions: ${totalForEntry.toFixed(2)} kg</p>
+                `;
+                activityList.appendChild(activityCard);
             }
-            dailyTotals[date] += emissions;
-
-            // Update activity list
-            var activityList = document.getElementById("activity-list");
-            var activityCard = document.createElement("div");
-            activityCard.className = "activity-card";
-            activityCard.innerHTML = `
-                <div class="user-pic"></div>
-                <p>${data.activity} (${data.category})</p>
-                <p>Quantity: ${data.quantity}</p>
-                <p>CO2 Emissions: ${data.emissions} kg</p>
-            `;
-            activityList.appendChild(activityCard);
         });
 
         // Process dailyTotals to compute differences
         var sortedDates = Object.keys(dailyTotals).sort();
         var points = [];
-        var previousPoints = 0;
+        var previousTotal = 0;
 
         sortedDates.forEach((date, index) => {
-            var currentPoints = dailyTotals[date];
-            var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
+            var currentTotal = dailyTotals[date];
+            var difference = index === 0 ? currentTotal : currentTotal - previousTotal;
             points.push(difference);
-            previousPoints = currentPoints;
+            previousTotal = currentTotal;
         });
 
         // Update chart with differences
@@ -1131,13 +1200,53 @@ function fetchData() {
         emissionsChart.update();
 
         // Update totals
-        var totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
         var totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
 
         document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
         document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+    }).catch((error) => {
+        console.error("Error fetching data: ", error);
     });
 }
+
+// function fetchData() {
+//     var userId = "{{ user_id }}";  // Ensure userId is passed from Flask to JavaScript
+
+//     // Query the user's activities from Firestore
+//     db.collection("users").doc(userId).collection("activities").orderBy("timestamp", "asc").get().then((querySnapshot) => {
+//         var totalEmissions = 0; // Initialize total emissions
+
+//         querySnapshot.forEach((doc) => {
+//             var data = doc.data();
+//             var emissions = parseFloat(data.emissions);
+//             var quantity = parseFloat(data.quantity);
+
+//             // Calculate total emissions for the activity
+//             if (!isNaN(emissions) && !isNaN(quantity)) {
+//                 totalEmissions += emissions * quantity;
+//             }
+
+//             // Update activity list
+//             var activityList = document.getElementById("activity-list");
+//             var activityCard = document.createElement("div");
+//             activityCard.className = "activity-card";
+//             activityCard.innerHTML = `
+//                 <div class="user-pic"></div>
+//                 <p>${data.activity} (${data.category})</p>
+//                 <p>Quantity: ${data.quantity}</p>
+//                 <p>CO2 Emissions: ${data.emissions} kg</p>
+//             `;
+//             activityList.appendChild(activityCard);
+//         });
+
+//         // Update the total emissions in the HTML
+//         document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+//     })
+//     .catch((error) => {
+//         console.error("Error fetching emissions data: ", error);
+//     });
+// }
+
 
 
 // Click event for the days

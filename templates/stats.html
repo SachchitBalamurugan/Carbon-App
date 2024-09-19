@@ -285,24 +285,27 @@ button:hover {
             <input type="text" placeholder="Search activities, goals, and tips">
             <div class="profile">
                 <div style="margin-right: 10px;" class="profile-pic"></div>
-                <p>Welcome to</p>
+                <p>{{username}}</p>
+                <button onclick="window.location.href='/logout'">Logout</button>
+
             </div>
         </header>
         <div class="content">
             <div class="main-section">
                 <div class="greeting" style="margin-bottom: 45px;">
-                    <h1 style="margin-bottom: 10px; font-size: 25px;">Carbon Tracker Dashboard</h1>
+                    <h1 style="margin-bottom: 10px; font-size: 25px;">Carbon Tracker Dashboard {{percentDecrease}}</h1>
                 </div>
                 <div style="display: flex; justify-content: space-between; gap: 20px;">
                     <div class="activities" style="flex: 1;">
                         <h2 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
-                        <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
-                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous day</h3>
+                        <h2 id="percent-change" style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
+                        <h2  style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous day</h3>
                     </div>
                     <div class="activities" style="flex: 1;">
-                        <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total CO2 emissions saved</h3>
-                        <h3 style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">$1.432 equivalent</h3>
-                        <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3>
+                        <!-- <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total CO2 emissions saved</h3> -->
+                        <h2 id="total-emissions" style="margin-bottom: 17px; font-size: 25px; color: #1c1c1c; font-weight: bold;">$1.432 equivalent</h3>
+                        <!-- <h3 style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous month</h3> -->
+                        <div id="previous-day-emissions"></div>
                     </div>
                 </div>
                 
@@ -386,105 +389,122 @@ const previousDay = new Date();
 previousDay.setDate(previousDay.getDate() - 1); // Get previous day
 
 fetchEmissionsData(currentDay, previousDay.toLocaleDateString());
-    let myBarChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Transportation', 'Food', 'Household', 'Manufacturing', 'Environmental', 'Total'],
-            datasets: [{
-                label: 'CO2 Emissions',
-                data: [0, 0, 0, 0, 0, 0], // This will be populated with Firebase data
-                backgroundColor: [
-                    '#E8F9D4', // Transportation
-                    '#E8F9D4', // Food
-                    '#E8F9D4', // Household
-                    '#E8F9D4', // Manufacturing
-                    '#E8F9D4', // Environmental
-                    '#E8F9D4'  // Total
-                ],
-                borderColor: [
-                    '#8EF913', // Transportation
-                    '#8EF913', // Food
-                    '#8EF913', // Household
-                    '#8EF913', // Manufacturing
-                    '#8EF913', // Environmental
-                    '#8EF913'  // Total
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    beginAtZero: true
-                },
-                y: {
-                    beginAtZero: true,
-                    max: 300 // Adjust this as needed
-                }
+let myBarChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Transportation', 'Food', 'Household', 'Manufacturing', 'Environmental', 'Total'],
+        datasets: [{
+            label: 'CO2 Emissions',
+            data: [0, 0, 0, 0, 0, 0], // This will be populated with Firebase data
+            backgroundColor: [
+                '#E8F9D4', // Transportation
+                '#E8F9D4', // Food
+                '#E8F9D4', // Household
+                '#E8F9D4', // Manufacturing
+                '#E8F9D4', // Environmental
+                '#E8F9D4'  // Total
+            ],
+            borderColor: [
+                '#8EF913', // Transportation
+                '#8EF913', // Food
+                '#8EF913', // Household
+                '#8EF913', // Manufacturing
+                '#8EF913', // Environmental
+                '#8EF913'  // Total
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                beginAtZero: true
             },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            return tooltipItem.dataset.label + ': ' + tooltipItem.raw;
-                        }
+            y: {
+                beginAtZero: true,
+                max: 300 // This will be updated dynamically
+            }
+        },
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(tooltipItem) {
+                        return tooltipItem.dataset.label + ': ' + tooltipItem.raw;
                     }
                 }
             }
         }
-    });
-    var userId = "{{ user_id }}";
+    }
+});
+var userId = "{{ user_id }}";
 
-    // Fetch data from Firestore and update chart
-            db.collection("users").doc(userId).collection("activities").get().then((querySnapshot) => {
-                if (querySnapshot.empty) {
-                    console.log('No matching documents.');
-                } else {
-                    let emissionsData = {
-                        transportation: 0,
-                        food: 0,
-                        household: 0,
-                        manufacturing: 0,
-                        environmental: 0,
-                        total: 0
-                    };
+// Fetch data from Firestore and update chart
+db.collection("users").doc(userId).collection("activities").get().then((querySnapshot) => {
+    if (querySnapshot.empty) {
+        console.log('No matching documents.');
+    } else {
+        let emissionsData = {
+            transportation: 0,
+            food: 0,
+            household: 0,
+            manufacturing: 0,
+            environmental: 0,
+            total: 0
+        };
 
-                    querySnapshot.forEach((doc) => {
-                        let data = doc.data();
-                        let category = data.category;
-                        let emissions = parseFloat(data.emissions); // Convert to number
-                        let quantity = parseFloat(data.quantity); // Convert to number
+        querySnapshot.forEach((doc) => {
+            let data = doc.data();
+            let category = data.category;
+            let emissions = parseFloat(data.emissions); // Convert to number
+            let quantity = parseFloat(data.quantity); // Convert to number
 
-                        if (!isNaN(emissions) && !isNaN(quantity)) {
-                            let totalEmissions = emissions * quantity;
-                            if (emissionsData.hasOwnProperty(category)) {
-                                emissionsData[category] += totalEmissions;
-                            }
-                            emissionsData.total += totalEmissions;
-                        }
-                    });
-
-                    console.log('Emissions data:', emissionsData); // Log the calculated emissions data
-
-                    // Update chart data
-                    myBarChart.data.datasets[0].data = [
-                        emissionsData.transportation/10,
-                        emissionsData.food/10,
-                        emissionsData.household/10,
-                        emissionsData.manufacturing/10,
-                        emissionsData.environmental/10,
-                        emissionsData.total/10
-                    ];
-                    myBarChart.update();
+            if (!isNaN(emissions) && !isNaN(quantity)) {
+                let totalEmissions = emissions * quantity;
+                if (emissionsData.hasOwnProperty(category)) {
+                    emissionsData[category] += totalEmissions;
                 }
-            }).catch((error) => {
-                console.error("Error getting documents: ", error);
-            });
+                emissionsData.total += totalEmissions;
+            }
+        });
+
+        console.log('Emissions data:', emissionsData); // Log the calculated emissions data
+
+        // Calculate maximum value for y-axis
+        let maxEmissions = Math.max(
+            emissionsData.transportation,
+            emissionsData.food,
+            emissionsData.household,
+            emissionsData.manufacturing,
+            emissionsData.environmental,
+            emissionsData.total
+        );
+
+        // Ensure the maximum value is at least 300, and move it up 100 units if it exceeds 300
+        let yMax = maxEmissions > 300 ? Math.ceil(maxEmissions / 100) * 100 : 300;
+
+        // Update chart data
+        myBarChart.data.datasets[0].data = [
+            emissionsData.transportation ,
+            emissionsData.food ,
+            emissionsData.household ,
+            emissionsData.manufacturing ,
+            emissionsData.environmental ,
+            emissionsData.total 
+        ];
+
+        // Update y-axis max value
+        myBarChart.options.scales.y.max = yMax;
+        myBarChart.update();
+    }
+}).catch((error) => {
+    console.error("Error getting documents: ", error);
+});
+
 
 });
 
@@ -492,6 +512,315 @@ fetchEmissionsData(currentDay, previousDay.toLocaleDateString());
 
 
 </script>
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        function formatDate(date) {
+            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        }
+
+        function fetchEmissionsForDate(userId, date) {
+            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+            return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
+                .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
+                .get()
+                .then((querySnapshot) => {
+                    let totalEmissions = 0;
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const emissions = parseFloat(data.emissions);
+                        const quantity = parseFloat(data.quantity);
+                        if (!isNaN(emissions) && !isNaN(quantity)) {
+                            totalEmissions += emissions * quantity;
+                        }
+                    });
+                    return totalEmissions;
+                });
+        }
+
+        function displayTotalEmissions(userId) {
+            const today = formatDate(new Date());
+
+            fetchEmissionsForDate(userId, today)
+                .then((todayEmissions) => {
+                    // Update the HTML with the total emissions for today
+                    document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
+                })
+                .catch((error) => {
+                    console.error("Error fetching emissions data: ", error);
+                });
+        }
+
+        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+        displayTotalEmissions(userId);
+    });
+</script> -->
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        function formatDate(date) {
+            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        }
+
+        function fetchEmissionsForDate(userId, date) {
+            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+            return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
+                .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
+                .get()
+                .then((querySnapshot) => {
+                    let totalEmissions = 0;
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const emissions = parseFloat(data.emissions);
+                        const quantity = parseFloat(data.quantity);
+                        if (!isNaN(emissions) && !isNaN(quantity)) {
+                            totalEmissions += emissions * quantity;
+                        }
+                    });
+                    return totalEmissions;
+                });
+        }
+
+        function displayEmissions(userId) {
+            const today = formatDate(new Date());
+            const yesterday = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+
+            // Fetch emissions data for today and the previous day
+            Promise.all([
+                fetchEmissionsForDate(userId, today),
+                fetchEmissionsForDate(userId, yesterday)
+            ]).then(([todayEmissions, yesterdayEmissions]) => {
+                // Update the HTML with the total emissions for today and the previous day
+                document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
+                document.getElementById("previous-day-emissions").textContent = `Total emissions for the previous day: ${yesterdayEmissions.toFixed(2)} kg`;
+
+                // Calculate percent decrease and update points
+                let percentDecrease = 0;
+                if (yesterdayEmissions > 0) {
+                    percentDecrease = ((yesterdayEmissions - todayEmissions) / yesterdayEmissions) * 100;
+                }
+                
+                // Update points based on percent decrease
+                let earnedPoints = 0;
+                if (percentDecrease >= 20) {
+                    earnedPoints = 200;
+                } else if (percentDecrease >= 10) {
+                    earnedPoints = 100;
+                }
+                
+                document.getElementById("earned-points").textContent = `Earned points: ${earnedPoints}`;
+
+            }).catch((error) => {
+                console.error("Error fetching emissions data: ", error);
+            });
+        }
+
+        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+        displayEmissions(userId);
+    });
+</script> -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        function formatDate(date) {
+            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        }
+
+        function fetchEmissionsForDate(userId, date) {
+            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+            return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
+                .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
+                .get()
+                .then((querySnapshot) => {
+                    let totalEmissions = 0;
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const emissions = parseFloat(data.emissions);
+                        const quantity = parseFloat(data.quantity);
+                        if (!isNaN(emissions) && !isNaN(quantity)) {
+                            totalEmissions += emissions * quantity;
+                        }
+                    });
+                    return totalEmissions;
+                });
+        }
+
+        function displayEmissions(userId) {
+            const today = formatDate(new Date());
+            const yesterday = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+
+            // Fetch emissions data for today and the previous day
+            Promise.all([
+                fetchEmissionsForDate(userId, today),
+                fetchEmissionsForDate(userId, yesterday)
+            ]).then(([todayEmissions, yesterdayEmissions]) => {
+                // Update the HTML with the total emissions for today and the previous day
+                document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
+                document.getElementById("previous-day-emissions").textContent = `Total emissions for the previous day: ${yesterdayEmissions.toFixed(2)} kg`;
+
+                // Calculate percent change
+                let percentChange = 0;
+                if (yesterdayEmissions > 0) {
+                    percentChange = ((todayEmissions - yesterdayEmissions) / yesterdayEmissions) * 100;
+                } else if (todayEmissions > 0) {
+                    percentChange = 100; // If there were no emissions yesterday but there are today, this is considered a 100% increase
+                }
+
+                // Determine change direction
+                let changeDirection = percentChange > 0 ? 'increase' : 'decrease';
+
+                // Update the HTML with percent change
+                document.getElementById("percent-change").textContent = `Percent ${changeDirection}: ${percentChange.toFixed(2)}%`;
+
+                // Calculate and update points based on percent change
+                let earnedPoints = 0;
+                if (percentChange <= -20) {
+                    earnedPoints = 200; // 20% decrease or more
+                } else if (percentChange <= -10) {
+                    earnedPoints = 100; // 10% decrease
+                } else if (percentChange > 0) {
+                    earnedPoints = 50; // For increases, a smaller reward
+                }
+
+                document.getElementById("earned-points").textContent = `Earned points: ${earnedPoints}`;
+
+            }).catch((error) => {
+                console.error("Error fetching emissions data: ", error);
+            });
+        }
+
+        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+        displayEmissions(userId);
+    });
+</script>
+
+<!-- 
+<p id="earned-points">Earned points: 0.00</p>
+<p id="total-emissions">Total emissions saved: 0.00 kg</p> -->
+<!-- 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('myBarChart').getContext('2d');
+
+        function formatDate(date) {
+            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+        }
+
+        function fetchAndProcessEmissions(userId) {
+            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+
+            // Query all documents ordered by timestamp
+            userActivitiesRef.orderBy("timestamp", "asc").get()
+                .then((querySnapshot) => {
+                    var dailyTotals = {};
+                    var sortedDates = [];
+
+                    querySnapshot.forEach((doc) => {
+                        var data = doc.data();
+                        var date = new Date(data.timestamp.toDate()).toLocaleDateString(); // Format date
+                        var emissions = parseFloat(data.emissions);
+                        var quantity = parseFloat(data.quantity);
+
+                        if (!isNaN(emissions) && !isNaN(quantity)) {
+                            var totalEmissions = emissions * quantity;
+
+                            if (!dailyTotals[date]) {
+                                dailyTotals[date] = 0;
+                                sortedDates.push(date); // Add date to sortedDates array
+                            }
+                            dailyTotals[date] += totalEmissions;
+                        }
+                    });
+
+                    // Sort dates
+                    sortedDates.sort((a, b) => new Date(a) - new Date(b));
+
+                    // Compute differences between dates
+                    var points = [];
+                    var previousPoints = 0;
+
+                    sortedDates.forEach((date, index) => {
+                        var currentPoints = dailyTotals[date];
+                        var difference = index === 0 ? currentPoints : currentPoints - previousPoints;
+                        points.push(difference);
+                        previousPoints = currentPoints;
+                    });
+
+                    // Update chart with differences
+                    myBarChart.data.labels = sortedDates;
+                    myBarChart.data.datasets[0].data = points;
+                    myBarChart.update();
+
+                    // Update totals
+                    var totalEmissions = sortedDates.reduce((sum, date) => sum + dailyTotals[date], 0);
+                    var totalPoints = totalEmissions; // Assuming 1 kg CO2 = 1 point
+
+                    document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
+                    document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+
+                    // Update activity list
+                    var activityList = document.getElementById("activity-list");
+                    activityList.innerHTML = ''; // Clear previous entries
+
+                    querySnapshot.forEach((doc) => {
+                        var data = doc.data();
+                        var activityCard = document.createElement("div");
+                        activityCard.className = "activity-card";
+                        activityCard.innerHTML = `
+                            <div class="user-pic"></div>
+                            <p>${data.activity} (${data.category})</p>
+                            <p>Quantity: ${data.quantity}</p>
+                            <p>CO2 Emissions: ${data.emissions} kg</p>
+                        `;
+                        activityList.appendChild(activityCard);
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error fetching emissions data: ", error);
+                });
+        }
+
+        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+        fetchAndProcessEmissions(userId);
+
+        // Initialize Chart.js if needed
+        let myBarChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [], // Will be updated dynamically
+                datasets: [{
+                    label: 'CO2 Emissions',
+                    data: [], // Will be updated dynamically
+                    backgroundColor: '#E8F9D4',
+                    borderColor: '#8EF913',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 300 // Adjust this as needed
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.dataset.label + ': ' + tooltipItem.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script> -->
 
                   
 
@@ -692,7 +1021,7 @@ fetchEmissionsData(currentDay, previousDay.toLocaleDateString());
                     return `${activity.activity} - ${activity.quantity} units, ${activity.emissions.toFixed(2)} kg CO2`;
                 }).join('\n');
     
-                const userInput = `I am trying to reduce fuel. My emissions data is as follows: 
+                const userInput = `I am trying to reduce my carbon emissions. My emissions data is as follows: 
                     ${activitiesList}
                     Total CO2 emissions: ${emissionsData.total.toFixed(2)} kg. What do I do?`;
     
