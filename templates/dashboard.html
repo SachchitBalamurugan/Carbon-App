@@ -84,6 +84,32 @@
             margin-top: 20px;
         }
 
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .item {
+            margin: 20px;
+            text-align: center;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 10px;
+            background-color: #76c7c0;
+            width: 0; /* Set this with JavaScript */
+            transition: width 0.5s;
+        }
+        img {
+            width: 400px;
+            height: 200px;
+        }
+
         .main-section {
             flex: 2;
             margin-right: 20px;
@@ -335,7 +361,7 @@
                 
             </div>
             <div class="stats-section">
-                <div class="stats">
+                <!-- <div class="stats">
                     <h2>Today's Stats</h2>
                     <div class="stats-grid" id="stats-grid">
                         <div data-day="Mon">Mon</div>
@@ -349,14 +375,41 @@
                     <div class="plans">
                         <h3>Future plans</h3>
                         <div id="badge-info">
-                            <!-- Badge information will be displayed here -->
+                            
                         </div>
                         <div id="plan-list">
                             
-                            <!-- Plans will be dynamically added here -->
                         </div>
                     </div>
-                </div>
+                </div> -->
+
+
+<div id="earned-points"></div>
+
+<div class="container">
+    <div class="item">
+        <img src="static/images/image.png" alt="Image 1">
+        <div class="progress-bar">
+            <div class="progress" id="progress1" style="width: 0;"></div>
+        </div>
+        <div id="message1">Progress Points: 0.00</div>
+    </div>
+    <div class="item">
+        <img src="static/images/image.png" alt="Image 2">
+        <div class="progress-bar">
+            <div class="progress" id="progress2" style="width: 0;"></div>
+        </div>
+        <div id="message2">Progress Points: 0.00</div>
+    </div>
+    <div class="item">
+        <img src="static/images/image.png" alt="Image 3">
+        <div class="progress-bar">
+            <div class="progress" id="progress3" style="width: 0;"></div>
+        </div>
+        <div id="message3">Progress Points: 0.00</div>
+    </div>
+</div>
+
             </div>
             
            
@@ -1210,7 +1263,6 @@ document.getElementById("activityForm").onsubmit = function(event) {
 // }
 
 // above code works
-
 function fetchData() {
     // Get the current user's ID (assuming it's stored globally or passed to this function)
     var userId = "{{ user_id }}";  // Ensure userId is passed from Flask to JavaScript
@@ -1280,6 +1332,24 @@ function fetchData() {
             previousTotal = currentTotal;
         });
 
+        function updateProgressBars(totalPoints) {
+    const progressBars = [
+        { max: 1000, id: 'progress1', messageId: 'message1' },
+        { max: 2000, id: 'progress2', messageId: 'message2' },
+        { max: 3000, id: 'progress3', messageId: 'message3' }
+    ];
+
+    progressBars.forEach(bar => {
+        const progressPercentage = Math.min((totalPoints / bar.max) * 100, 100);
+        document.getElementById(bar.id).style.width = progressPercentage + '%';
+        
+        // Update the message with current progress points
+        const earnedPoints = Math.min(totalPoints, bar.max).toFixed(2);
+        document.getElementById(bar.messageId).textContent = `Progress Points: ${earnedPoints}`;
+    });
+}
+
+
         // Update chart with differences
         emissionsChart.data.labels = sortedDates;
         emissionsChart.data.datasets[0].data = points;
@@ -1288,10 +1358,20 @@ function fetchData() {
         // Update totals in the UI
         document.getElementById("earned-points").textContent = `Earned points: ${totalPoints.toFixed(2)}`;
         document.getElementById("total-emissions").textContent = `Total emissions saved: ${totalEmissions.toFixed(2)} kg`;
+
+        // Update progress bars based on totalPoints
+        updateProgressBars(totalPoints);
+
     }).catch((error) => {
         console.error("Error fetching data: ", error);
     });
 }
+
+// IMPORTANT 3 PROGRESS BARSS
+
+
+
+
 
 // function fetchData() {
 //     var userId = "{{ user_id }}";  // Ensure userId is passed from Flask to JavaScript
