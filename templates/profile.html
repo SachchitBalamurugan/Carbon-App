@@ -226,6 +226,28 @@
             background-color: #333;
         }
 
+        .posts-section {
+            margin-top: 20px;
+            background-color: #F1F1F1;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .post {
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .post img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
         .update {
             display: flex;
             align-items: center;
@@ -348,38 +370,143 @@
                 <div class="update-section">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="display: inline-flex; justify-content: center; align-items: center; background-color: #1a1a1a; width: 50px; height: 50px; border-radius: 50%; font-weight: bold; color: #000; font-size: 18px;">
-                          
+                            U
                         </div>
-                        <input type="text" placeholder="Share your update" style="flex: 1;">
+                        <input type="text" id="postInput" placeholder="Share your update" style="flex: 1;">
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        <label for="imageInput" style="cursor: pointer;">
+                            <i class="fa-solid fa-camera" style="color: #000000; font-size: 24px;"></i>
+                        </label>
+                    </div>
+                    <div class="preview" id="imagePreviewContainer" style="display: none;">
+                        <img id="imagePreview" src="" alt="Image Preview" style="max-width: 100%; height: auto;">
+                        <button style="background-color: red; color: white;" id="removeImageButton" class="remove-image">Remove</button>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 10px;">
-                        <div style="display: flex; gap: 10px;">
-                            <i class="fa-solid fa-photo-film" style="color: #000000; font-size: 24px;"></i>
-                            <i class="fa-solid fa-paperclip" style="color: #000000; font-size: 24px;"></i>
-                            <i class="fa-solid fa-location-dot" style="color: #000000; font-size: 24px;"></i>
-                            <i class="fa-regular fa-face-smile" style="color: #000000; font-size: 24px;"></i>
-                        </div>
-                        <button>Save</button>
-                    </div>                    
+                        <button id="postButton">Post</button>
+                    </div>
                 </div>
-                <h3 style="margin-bottom: 10px;">Updates</h3>
-                <div class="content-section">
-                    
-                    <div class="update">
-                        <div class="user-pic"></div>
-                        <p>User's Name is exploring outdoors</p>
-                    </div>
-                    <div class="update">
-                        <p>I'm enjoying a walk in the park, reducing my carbon footprint. Check out my journey to sustainability! #GreenLiving #CarbonTracker</p>
-                    </div>
-                    <div class="gallery">
-                        <img src="https://via.placeholder.com/150" alt="Update image">
-                        <img src="https://via.placeholder.com/150" alt="Update image">
-                        <img src="https://via.placeholder.com/150" alt="Update image">
-                        <img src="https://via.placeholder.com/150" alt="Update image">
-                    </div>
+            
+                <div class="posts-section">
+                    <h3>Posts</h3>
+                    <div id="postsContainer"></div>
                 </div>
             </div>
+            
+            <script>
+                const postButton = document.getElementById('postButton');
+                const postInput = document.getElementById('postInput');
+                const imageInput = document.getElementById('imageInput');
+                const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+                const imagePreview = document.getElementById('imagePreview');
+                const removeImageButton = document.getElementById('removeImageButton');
+            
+                // Function to display a post
+                function displayPost(postContent, imageUrl) {
+                    const postDiv = document.createElement('div');
+                    postDiv.className = 'post';
+                    postDiv.innerHTML = `
+                        <div style="font-weight: bold;">User's Name</div>
+                        <div>${postContent}</div>
+                    `;
+                    
+                    // Check if an image URL is present
+                    if (imageUrl) {
+                        const img = document.createElement('img');
+                        img.src = imageUrl;  // Use the URL from the server
+                        img.style.maxWidth = '100%'; // Ensure the image is responsive
+                        postDiv.appendChild(img);
+                    }
+            
+                    // Append the new post to the posts container
+                    document.getElementById('postsContainer').appendChild(postDiv);
+                }
+            
+                // Fetch existing posts on page load
+                window.onload = function() {
+                    fetch('/get_posts', { credentials: 'include' })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Loop through each post and display it
+                            data.posts.forEach(post => {
+                                displayPost(post.content, post.imageUrl);  // Assuming post has 'content' and 'imageUrl' properties
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching posts:', error);
+                        });
+                };
+            
+                // Handle image preview
+                imageInput.addEventListener('change', function() {
+                    if (imageInput.files.length > 0) {
+                        const file = imageInput.files[0];
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            imagePreview.src = event.target.result;
+                            imagePreviewContainer.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            
+                // Handle image removal
+                removeImageButton.addEventListener('click', function() {
+                    imageInput.value = '';  // Clear the file input
+                    imagePreviewContainer.style.display = 'none';  // Hide the preview
+                });
+            
+                // Handle post submission
+                postButton.addEventListener('click', function() {
+                    const postContent = postInput.value;
+                    const formData = new FormData();
+            
+                    if (postContent.trim() !== "" || imageInput.files.length > 0) {
+                        formData.append('post_content', postContent);
+                        if (imageInput.files.length > 0) {
+                            formData.append('image', imageInput.files[0]);
+                        }
+            
+                        fetch('/post_update', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'include'
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.response) {
+                                displayPost(postContent, URL.createObjectURL(imageInput.files[0])); // Display the new post immediately
+                                postInput.value = '';
+                                imageInput.value = '';
+                                removeImageButton.click(); // Trigger remove image button to reset preview
+                            } else {
+                                alert('Error creating post: ' + data.response);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error occurred while creating post: ' + error.message);
+                        });
+                    } else {
+                        alert('Please enter a post or upload an image.');
+                    }
+                });
+            </script>
+                        
+            
+                
+            
+                
         </div>
     </div>
 </body>
