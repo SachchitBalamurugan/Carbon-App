@@ -15,6 +15,59 @@
             font-family: Arial, sans-serif;
         }
 
+.course-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    width: 80%;
+    max-width: 1200px;
+}
+
+.course-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.course-card img {
+    width: 100%;
+    border-radius: 10px 10px 0 0;
+}
+
+.course-card h3 {
+    margin: 20px 0 10px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.course-card p {
+    color: #777;
+    font-size: 1em;
+    margin-bottom: 20px;
+}
+
+.course-card button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.course-card button:hover {
+    background-color: #2980b9;
+}
+
+.course-card:hover {
+    transform: translateY(-10px);
+}
+
         body {
             display: flex;
             background-color: #ffffff;
@@ -358,7 +411,45 @@
                     <h2 style="margin-bottom: 17px; font-size: 20px;">Total emissions saved</h2>
                     <canvas id="emissionsChart" class="chart"></canvas>
                 </div>
-                
+                <div class="course-container">
+                    <div class="course-card">
+                        <img src="static/images/feet.jpg" alt="Course Image">
+                        <h3>Understanding Your Carbon Footprint</h3>
+                        <p>Learn how everyday activities contribute to carbon emissions and discover ways to reduce your impact.
+
+                        </p>
+                        <button>Start</button>
+                    </div>
+            
+                    <div class="course-card">
+                        <img src="static/images/car.jpg" alt="Course Image">
+                        <h3>Carbon Reduction Strategies for a Greener Future</h3>
+                        <p>Explore effective strategies for reducing carbon emissions at home, work, and in your community.
+
+                        </p>
+                        <button>Start</button>
+                    </div>
+            
+                    <div class="course-card">
+                        <img src="static/images/green.jpg" alt="Course Image">
+                        <h3>Sustainable Living: Minimizing Your Environmental Impact</h3>
+                        <p>Gain insights into sustainable living practices that can help you lower your carbon footprint and live eco-consciously.
+
+
+
+
+
+
+                        </p>    
+                        <button onclick="window.location.href='course3'">Start</button>
+                    </div>
+            
+                    <div class="course-card">
+                        <img src="https://via.placeholder.com/150" alt="Course Image">
+                        <h3>More Course Coming Soon!</h3>
+                    </div>
+                </div>
+            
             </div>
             <div class="stats-section">
                 <!-- <div class="stats">
@@ -1528,6 +1619,8 @@ window.onload = fetchData;
 
 
 </script>
+
+
 
 </body>
 </html>

@@ -299,7 +299,7 @@ button:hover {
                     <div class="activities" style="flex: 1;">
                         <h2 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
                         <h2 id="percent-change" style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Track your carbon footprint</h3>
-                        <h2  style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to previous day</h3>
+                        <h2  style="margin-bottom: 17px; font-size: 15px; color: #5D5D5B; font-weight: 300;">Compared to last date</h3>
                     </div>
                     <div class="activities" style="flex: 1;">
                         <!-- <h3 style="margin-bottom: 17px; font-size: 20px; color: #5D5D5B; font-weight: 300;">Total CO2 emissions saved</h3> -->
@@ -310,7 +310,7 @@ button:hover {
                 </div>
                 
                 
-
+                <h2>Total Emissions by Category</h2>
                  <!-- Chart -->
                  <div style="position: relative; width: 100%; height: 300px;">
                     <canvas id="myBarChart"></canvas>
@@ -512,184 +512,212 @@ db.collection("users").doc(userId).collection("activities").get().then((querySna
 
 
 </script>
-<!-- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        function formatDate(date) {
-            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-        }
 
-        function fetchEmissionsForDate(userId, date) {
-            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
-            return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
-                .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
-                .get()
-                .then((querySnapshot) => {
-                    let totalEmissions = 0;
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const emissions = parseFloat(data.emissions);
-                        const quantity = parseFloat(data.quantity);
-                        if (!isNaN(emissions) && !isNaN(quantity)) {
-                            totalEmissions += emissions * quantity;
-                        }
-                    });
-                    return totalEmissions;
-                });
-        }
-
-        function displayTotalEmissions(userId) {
-            const today = formatDate(new Date());
-
-            fetchEmissionsForDate(userId, today)
-                .then((todayEmissions) => {
-                    // Update the HTML with the total emissions for today
-                    document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
-                })
-                .catch((error) => {
-                    console.error("Error fetching emissions data: ", error);
-                });
-        }
-
-        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
-        displayTotalEmissions(userId);
-    });
-</script> -->
-<!-- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        function formatDate(date) {
-            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-        }
-
-        function fetchEmissionsForDate(userId, date) {
-            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
-            return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
-                .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
-                .get()
-                .then((querySnapshot) => {
-                    let totalEmissions = 0;
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const emissions = parseFloat(data.emissions);
-                        const quantity = parseFloat(data.quantity);
-                        if (!isNaN(emissions) && !isNaN(quantity)) {
-                            totalEmissions += emissions * quantity;
-                        }
-                    });
-                    return totalEmissions;
-                });
-        }
-
-        function displayEmissions(userId) {
-            const today = formatDate(new Date());
-            const yesterday = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
-
-            // Fetch emissions data for today and the previous day
-            Promise.all([
-                fetchEmissionsForDate(userId, today),
-                fetchEmissionsForDate(userId, yesterday)
-            ]).then(([todayEmissions, yesterdayEmissions]) => {
-                // Update the HTML with the total emissions for today and the previous day
-                document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
-                document.getElementById("previous-day-emissions").textContent = `Total emissions for the previous day: ${yesterdayEmissions.toFixed(2)} kg`;
-
-                // Calculate percent decrease and update points
-                let percentDecrease = 0;
-                if (yesterdayEmissions > 0) {
-                    percentDecrease = ((yesterdayEmissions - todayEmissions) / yesterdayEmissions) * 100;
-                }
-                
-                // Update points based on percent decrease
-                let earnedPoints = 0;
-                if (percentDecrease >= 20) {
-                    earnedPoints = 200;
-                } else if (percentDecrease >= 10) {
-                    earnedPoints = 100;
-                }
-                
-                document.getElementById("earned-points").textContent = `Earned points: ${earnedPoints}`;
-
-            }).catch((error) => {
-                console.error("Error fetching emissions data: ", error);
-            });
-        }
-
-        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
-        displayEmissions(userId);
-    });
-</script> -->
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        function formatDate(date) {
-            return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-        }
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     function formatDate(date) {
+    //         return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    //     }
 
-        function fetchEmissionsForDate(userId, date) {
-            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
-            return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
-                .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
+    //     function fetchEmissionsForDate(userId, date) {
+    //         const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+    //         return userActivitiesRef.where("timestamp", ">=", new Date(date + 'T00:00:00Z'))
+    //             .where("timestamp", "<", new Date(date + 'T23:59:59Z'))
+    //             .get()
+    //             .then((querySnapshot) => {
+    //                 let totalEmissions = 0;
+    //                 querySnapshot.forEach((doc) => {
+    //                     const data = doc.data();
+    //                     const emissions = parseFloat(data.emissions);
+    //                     const quantity = parseFloat(data.quantity);
+    //                     if (!isNaN(emissions) && !isNaN(quantity)) {
+    //                         totalEmissions += emissions * quantity;
+    //                     }
+    //                 });
+    //                 return totalEmissions;
+    //             });
+    //     }
+
+    //     function displayEmissions(userId) {
+    //         const today = formatDate(new Date());
+    //         const yesterday = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+
+    //         // Fetch emissions data for today and the previous day
+    //         Promise.all([
+    //             fetchEmissionsForDate(userId, today),
+    //             fetchEmissionsForDate(userId, yesterday)
+    //         ]).then(([todayEmissions, yesterdayEmissions]) => {
+    //             // Update the HTML with the total emissions for today and the previous day
+    //             document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
+    //             document.getElementById("previous-day-emissions").textContent = `Total emissions for the previous day: ${yesterdayEmissions.toFixed(2)} kg`;
+
+    //             // Calculate percent change
+    //             let percentChange = 0;
+    //             if (yesterdayEmissions > 0) {
+    //                 percentChange = ((todayEmissions - yesterdayEmissions) / yesterdayEmissions) * 100;
+    //             } else if (todayEmissions > 0) {
+    //                 percentChange = 100; // If there were no emissions yesterday but there are today, this is considered a 100% increase
+    //             }
+
+    //             // Determine change direction
+    //             let changeDirection = percentChange > 0 ? 'increase' : 'decrease';
+
+    //             // Update the HTML with percent change
+    //             document.getElementById("percent-change").textContent = `Percent ${changeDirection}: ${percentChange.toFixed(2)}%`;
+
+    //             // Calculate and update points based on percent change
+    //             let earnedPoints = 0;
+    //             if (percentChange <= -20) {
+    //                 earnedPoints = 200; // 20% decrease or more
+    //             } else if (percentChange <= -10) {
+    //                 earnedPoints = 100; // 10% decrease
+    //             } else if (percentChange > 0) {
+    //                 earnedPoints = 50; // For increases, a smaller reward
+    //             }
+
+    //             document.getElementById("earned-points").textContent = `Earned points: ${earnedPoints}`;
+
+    //         }).catch((error) => {
+    //             console.error("Error fetching emissions data: ", error);
+    //         });
+    //     }
+
+    //     const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+    //     displayEmissions(userId);
+    // });
+    document.addEventListener('DOMContentLoaded', () => {
+    function formatDateToISO(date) {
+        return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    }
+
+    function getStartAndEndOfDay(date) {
+        // Ensure the times are in UTC
+        const startOfDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59));
+        return { startOfDay, endOfDay };
+    }
+
+    
+
+    // Assuming you have already initialized Firebase
+// Initialize Firestore
+const db = firebase.firestore();
+
+function fetchEmissionsForDate(userId, date) {
+    const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0); // Start of the day
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999); // End of the day
+
+    return userActivitiesRef
+        .where("timestamp", ">=", startOfDay)
+        .where("timestamp", "<=", endOfDay)
+        .get()
+        .then((querySnapshot) => {
+            let totalEmissions = 0;
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const emissions = parseFloat(data.emissions);
+                const quantity = parseFloat(data.quantity);
+                if (!isNaN(emissions) && !isNaN(quantity)) {
+                    totalEmissions += emissions * quantity;
+                }
+            });
+            return totalEmissions; // Return the total emissions
+        });
+}
+function fetchLastRecordedEmissions(userId) {
+    const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0); // Start of today
+
+    return userActivitiesRef
+        .where("timestamp", "<", todayStart) // Get records before today
+        .orderBy("timestamp", "desc") // Order by timestamp in descending order
+        .limit(1) // Get the latest one
+        .get()
+        .then((querySnapshot) => {
+            if (querySnapshot.empty) {
+                return 0; // Return 0 if no records found
+            }
+
+            const recentDoc = querySnapshot.docs[0];
+            const recentTimestamp = recentDoc.data().timestamp.toDate(); // Get the timestamp of the last recorded date
+
+            // Now, fetch all records for that specific date
+            return userActivitiesRef
+                .where("timestamp", ">=", new Date(recentTimestamp.setHours(0, 0, 0, 0))) // Start of the day
+                .where("timestamp", "<=", new Date(recentTimestamp.setHours(23, 59, 59, 999))) // End of the day
                 .get()
-                .then((querySnapshot) => {
+                .then((dateSnapshot) => {
                     let totalEmissions = 0;
-                    querySnapshot.forEach((doc) => {
+                    dateSnapshot.forEach((doc) => {
                         const data = doc.data();
                         const emissions = parseFloat(data.emissions);
                         const quantity = parseFloat(data.quantity);
                         if (!isNaN(emissions) && !isNaN(quantity)) {
-                            totalEmissions += emissions * quantity;
+                            totalEmissions += emissions * quantity; // Sum total emissions for that date
                         }
                     });
-                    return totalEmissions;
+                    return totalEmissions; // Return the total emissions for the last recorded day
                 });
+        });
+}
+
+function displayEmissions(userId) {
+    const today = new Date();
+
+    // Fetch emissions data for today and the last recorded day
+    Promise.all([
+        fetchEmissionsForDate(userId, today), // Function for today's emissions
+        fetchLastRecordedEmissions(userId) // New function for the last recorded emissions
+    ]).then(([todayEmissions, lastRecordedEmissions]) => {
+        // Check if the elements exist before updating their content
+        const totalEmissionsElement = document.getElementById("total-emissions");
+        const previousDayEmissionsElement = document.getElementById("previous-day-emissions");
+        const percentChangeElement = document.getElementById("percent-change");
+
+        if (totalEmissionsElement) {
+            totalEmissionsElement.textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
         }
 
-        function displayEmissions(userId) {
-            const today = formatDate(new Date());
-            const yesterday = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
-
-            // Fetch emissions data for today and the previous day
-            Promise.all([
-                fetchEmissionsForDate(userId, today),
-                fetchEmissionsForDate(userId, yesterday)
-            ]).then(([todayEmissions, yesterdayEmissions]) => {
-                // Update the HTML with the total emissions for today and the previous day
-                document.getElementById("total-emissions").textContent = `Total emissions for today: ${todayEmissions.toFixed(2)} kg`;
-                document.getElementById("previous-day-emissions").textContent = `Total emissions for the previous day: ${yesterdayEmissions.toFixed(2)} kg`;
-
-                // Calculate percent change
-                let percentChange = 0;
-                if (yesterdayEmissions > 0) {
-                    percentChange = ((todayEmissions - yesterdayEmissions) / yesterdayEmissions) * 100;
-                } else if (todayEmissions > 0) {
-                    percentChange = 100; // If there were no emissions yesterday but there are today, this is considered a 100% increase
-                }
-
-                // Determine change direction
-                let changeDirection = percentChange > 0 ? 'increase' : 'decrease';
-
-                // Update the HTML with percent change
-                document.getElementById("percent-change").textContent = `Percent ${changeDirection}: ${percentChange.toFixed(2)}%`;
-
-                // Calculate and update points based on percent change
-                let earnedPoints = 0;
-                if (percentChange <= -20) {
-                    earnedPoints = 200; // 20% decrease or more
-                } else if (percentChange <= -10) {
-                    earnedPoints = 100; // 10% decrease
-                } else if (percentChange > 0) {
-                    earnedPoints = 50; // For increases, a smaller reward
-                }
-
-                document.getElementById("earned-points").textContent = `Earned points: ${earnedPoints}`;
-
-            }).catch((error) => {
-                console.error("Error fetching emissions data: ", error);
-            });
+        if (previousDayEmissionsElement) {
+            previousDayEmissionsElement.textContent = `Total emissions for the last recorded day: ${lastRecordedEmissions.toFixed(2)} kg`;
         }
 
-        const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
-        displayEmissions(userId);
+        // Calculate percent change
+        let percentChange = 0;
+if (lastRecordedEmissions > 0) {
+    percentChange = ((todayEmissions - lastRecordedEmissions) / lastRecordedEmissions) * 100;
+} else if (todayEmissions > 0) {
+    percentChange = 100; // If there were no emissions on the last recorded day but there are today, this is considered a 100% increase
+}
+
+// Update the HTML with percent change
+if (percentChangeElement) {
+    percentChangeElement.textContent = `Percent change: ${percentChange.toFixed(2)}%`;
+}
+
+
+        // Additional logic for points can go here if needed
+    }).catch((error) => {
+        console.error("Error fetching emissions data: ", error);
     });
+}
+
+// Usage
+const userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+displayEmissions(userId);
+
+});
+
+
 </script>
+
+
 
 <!-- 
 <p id="earned-points">Earned points: 0.00</p>
@@ -825,56 +853,12 @@ db.collection("users").doc(userId).collection("activities").get().then((querySna
                   
 
                 <!-- Chart -->
-                <div style="position: relative; width: 100%; height: 300px; background-color: white; ">
+                <h2>Today's Emissions by Category</h2>
+<canvas style="margin-top: 10px; margin-bottom: 10px;" id="emissionsChart" width="400" height="200"></canvas>
 
-                    <!-- Grid lines and numbers -->
-                    <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; display: flex; flex-direction: column; justify-content: space-between; z-index: 0; ">
-                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">8</span></div>
-                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">6</span></div>
-                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">4</span></div>
-                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">2</span></div>
-                      <div style="border-top: 1px solid #e0e0e0; width: 100%;"><span style="position: absolute; left: 10px;">0</span></div>
-                    </div>
-                  
-                    <!-- Bars -->
-                    <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 100%; width: 100%; position: relative; z-index: 1; margin-top: 30px; ">
-                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
-                        <div style="position: relative; height: 100%; width: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div style="background-color: #E8F9D4; height: 250px; width: 80px; border-radius: 45px 45px 0 0;"></div>
-                          <div style="background-color: #8EF913; height: 50px; width: 80px; border-radius:  0 0 45px 45px;"></div>
-                          
-                        </div>
-                        <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
-                            <span style="margin-top: 2px; flex: 1; text-align: center; margin-left: 10px;">Training effectiveness on carbon reduction</span>
-                        </div>
-                      </div>
-                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
-                        <div style="position: relative; height: 100%; width: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div style="background-color: #E8F9D4; height: 250px; width: 80px; border-radius: 45px 45px 0 0;"></div>
-                          <div style="background-color: #8EF913; height: 50px; width: 80px; border-radius:  0 0 45px 45px;"></div>
-                          
-                        </div>
-                        <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
-                            <span style="margin-top: 2px; flex: 1; text-align: center;">Satisfaction with eco-friendly practices</span>
-                        </div>
-                      </div>
-                      <div style="display: flex; flex-direction: column; justify-content: flex-end; align-items: center; margin: -20px 10px;">
-                        <div style="position: relative; height: 100%; width: 80px; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div style="background-color: #E8F9D4; height: 250px; width: 80px; border-radius: 45px 45px 0 0;"></div>
-                          <div style="background-color: #8EF913; height: 50px; width: 80px; border-radius:  0 0 45px 45px;"></div>
-                          
-                        </div>
-                        <div style="display: flex; justify-content: center; align-items: center; width: 100%; ">
-                            <span style="margin-top: 2px; flex: 1; text-align: center;">Engagement with sustainable living</span>
-                        </div>
-                      </div>
-                      
-                     
-                    </div>
-                    <div style="width: 100%; height: 100px; background-color: white;"></div>
+<h2>Percent Change From Last Time Emissions by Category</h2>
+<canvas id="percentChart" width="400" height="200"></canvas>
 
-                  
-                  </div>
                   
             </div>
             <div class="stats-section">
@@ -1096,6 +1080,310 @@ db.collection("users").doc(userId).collection("activities").get().then((querySna
         }
     
         // Existing code for chart initialization and fetching data remains unchanged...
+    </script>
+
+    <script>
+        async function displayTodaysEmissionsSummary() {
+            var userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+            const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+            
+            // Get today's date
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0); // Start of today
+    
+            // Initialize emissions data for today
+            let emissionsData = {
+                transportation: 0,
+                food: 0,
+                household: 0,
+                manufacturing: 0,
+                environmental: 0,
+                total: 0
+            };
+    
+            // Fetch today's activities
+            const querySnapshot = await userActivitiesRef
+                .where("timestamp", ">=", todayStart) // Get records from today
+                .get();
+    
+            if (querySnapshot.empty) {
+                console.log('No matching documents for today.');
+                return;
+            }
+    
+            // Calculate total emissions by category for today
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
+                let category = data.category;
+                let emissions = parseFloat(data.emissions); // Convert to number
+                let quantity = parseFloat(data.quantity); // Convert to number
+    
+                if (!isNaN(emissions) && !isNaN(quantity)) {
+                    let totalEmissions = emissions * quantity;
+                    if (emissionsData.hasOwnProperty(category)) {
+                        emissionsData[category] += totalEmissions;
+                    }
+                    emissionsData.total += totalEmissions;
+                }
+            });
+    
+            // Display emissions summary
+            let summary = `<h3>Today's Emissions Summary</h3>`;
+            summary += `<p>Transportation: ${emissionsData.transportation.toFixed(2)} kg CO2</p>`;
+            summary += `<p>Food: ${emissionsData.food.toFixed(2)} kg CO2</p>`;
+            summary += `<p>Household: ${emissionsData.household.toFixed(2)} kg CO2</p>`;
+            summary += `<p>Manufacturing: ${emissionsData.manufacturing.toFixed(2)} kg CO2</p>`;
+            summary += `<p>Environmental: ${emissionsData.environmental.toFixed(2)} kg CO2</p>`;
+            summary += `<p>Total Emissions for Today: ${emissionsData.total.toFixed(2)} kg CO2</p>`;
+    
+            // Create the chart
+            createEmissionsChart(emissionsData);
+        }
+    
+        function createEmissionsChart(emissionsData) {
+            const ctx = document.getElementById('emissionsChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Transportation', 'Food', 'Household', 'Manufacturing', 'Environmental'],
+                    datasets: [{
+                        label: 'Emissions (kg CO2)',
+                        data: [
+                            emissionsData.transportation,
+                            emissionsData.food,
+                            emissionsData.household,
+                            emissionsData.manufacturing,
+                            emissionsData.environmental
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Emissions (kg CO2)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        title: {
+                            display: true,
+                            
+                        }
+                    }
+                }
+            });
+        }
+    
+        // Call the function to display today's emissions summary when the page loads
+        document.addEventListener('DOMContentLoaded', displayTodaysEmissionsSummary);
+    </script>
+    
+    <script>
+     async function displayEmissionsPercentChange() {
+    var userId = "{{ user_id }}"; // Assuming user_id is passed from Flask
+    const userActivitiesRef = db.collection("users").doc(userId).collection("activities");
+
+    // Get today's date range
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0); // Start of today
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999); // End of today
+
+    // Get yesterday's date range
+    const yesterdayStart = new Date();
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1); // Go back to yesterday
+    yesterdayStart.setHours(0, 0, 0, 0); // Start of yesterday
+    const yesterdayEnd = new Date();
+    yesterdayEnd.setHours(23, 59, 59, 999); // End of yesterday
+
+    let emissionsData = {
+        today: {
+            transportation: 0,
+            food: 0,
+            household: 0,
+            manufacturing: 0,
+            environmental: 0,
+            total: 0
+        },
+        yesterday: {
+            transportation: 0,
+            food: 0,
+            household: 0,
+            manufacturing: 0,
+            environmental: 0,
+            total: 0
+        }
+    };
+
+    // Fetch today's and yesterday's activities
+    const todayQuery = userActivitiesRef.where("timestamp", ">=", todayStart).where("timestamp", "<=", todayEnd).get();
+    const yesterdayQuery = userActivitiesRef.where("timestamp", ">=", yesterdayStart).where("timestamp", "<=", yesterdayEnd).get();
+
+    // Process today's activities
+    await todayQuery.then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            let data = doc.data();
+            let category = data.category;
+            let emissions = parseFloat(data.emissions) || 0; 
+            let quantity = parseFloat(data.quantity) || 0; 
+
+            if (!isNaN(emissions) && !isNaN(quantity)) {
+                let totalEmissions = emissions * quantity;
+                if (emissionsData.today.hasOwnProperty(category)) {
+                    emissionsData.today[category] += totalEmissions;
+                }
+                emissionsData.today.total += totalEmissions;
+            }
+        });
+    });
+
+    // Process yesterday's activities
+    await yesterdayQuery.then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            let data = doc.data();
+            let category = data.category;
+            let emissions = parseFloat(data.emissions) || 0; 
+            let quantity = parseFloat(data.quantity) || 0; 
+
+            if (!isNaN(emissions) && !isNaN(quantity)) {
+                let totalEmissions = emissions * quantity;
+                if (emissionsData.yesterday.hasOwnProperty(category)) {
+                    emissionsData.yesterday[category] += totalEmissions;
+                }
+                emissionsData.yesterday.total += totalEmissions;
+            }
+        });
+    });
+
+    // Calculate percent change
+    let percentChangeData = {
+        transportation: 0,
+        food: 0,
+        household: 0,
+        manufacturing: 0,
+        environmental: 0,
+        total: 0
+    };
+
+    // Calculate percent change
+    for (let category of Object.keys(percentChangeData)) {
+        const todayValue = emissionsData.today[category];
+        const yesterdayValue = emissionsData.yesterday[category];
+
+        // Calculate percent change
+        if (yesterdayValue > 0) {
+            percentChangeData[category] = ((todayValue - yesterdayValue) / yesterdayValue) * 100;
+        } else {
+            percentChangeData[category] = todayValue > 0 ? 100 : 0; // 100% if previously 0
+        }
+    }
+
+    // Calculate total percent change
+    const totalToday = emissionsData.today.total;
+    const totalYesterday = emissionsData.yesterday.total;
+    if (totalYesterday > 0) {
+        percentChangeData.total = ((totalToday - totalYesterday) / totalYesterday) * 100;
+    } else {
+        percentChangeData.total = totalToday > 0 ? 100 : 0; // 100% if previously 0
+    }
+
+    // Display percent change summary
+    let percentChangeSummary = `<h3>Percent Change in Emissions</h3>`;
+    percentChangeSummary += `<p><strong>Today's Totals:</strong></p>`;
+    percentChangeSummary += `<p>Transportation: ${emissionsData.today.transportation.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Food: ${emissionsData.today.food.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Household: ${emissionsData.today.household.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Manufacturing: ${emissionsData.today.manufacturing.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Environmental: ${emissionsData.today.environmental.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p><strong>Previous Day Totals:</strong></p>`;
+    percentChangeSummary += `<p>Transportation: ${emissionsData.yesterday.transportation.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Food: ${emissionsData.yesterday.food.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Household: ${emissionsData.yesterday.household.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Manufacturing: ${emissionsData.yesterday.manufacturing.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p>Environmental: ${emissionsData.yesterday.environmental.toFixed(2)} kg</p>`;
+    percentChangeSummary += `<p><strong>Percent Change:</strong></p>`;
+    percentChangeSummary += `<p>Transportation: ${percentChangeData.transportation.toFixed(2)}%</p>`;
+    percentChangeSummary += `<p>Food: ${percentChangeData.food.toFixed(2)}%</p>`;
+    percentChangeSummary += `<p>Household: ${percentChangeData.household.toFixed(2)}%</p>`;
+    percentChangeSummary += `<p>Manufacturing: ${percentChangeData.manufacturing.toFixed(2)}%</p>`;
+    percentChangeSummary += `<p>Environmental: ${percentChangeData.environmental.toFixed(2)}%</p>`;
+    percentChangeSummary += `<p><strong>Total Percent Change: ${percentChangeData.total.toFixed(2)}%</strong></p>`;
+
+    // Create the percent change chart
+    const ctx = document.getElementById('percentChart').getContext('2d');
+    const percentChart = new Chart(ctx, {
+        type: 'bar', // or 'line', 'pie', etc.
+        data: {
+            labels: ['Transportation', 'Food', 'Household', 'Manufacturing', 'Environmental', 'Total'],
+            datasets: [{
+                label: 'Percent Change (%)',
+                data: [
+                    percentChangeData.transportation,
+                    percentChangeData.food,
+                    percentChangeData.household,
+                    percentChangeData.manufacturing,
+                    percentChangeData.environmental,
+                    percentChangeData.total
+                ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Percent Change (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Call the function on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', displayEmissionsPercentChange);
+
     </script>
     
 

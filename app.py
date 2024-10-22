@@ -88,6 +88,9 @@ def get_ai_response(prompt):
 #         return jsonify({'error': str(e)})
     
 
+@app.route('/course3')
+def course3():
+    return render_template('course3.html')
 
 
 @app.route('/get_ai_advice', methods=['POST'])

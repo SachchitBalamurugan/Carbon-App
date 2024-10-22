@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainable Living Course</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .sidebar {
+            width: 20%;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: #3498db;
+            font-size: 1.1em;
+        }
+
+        .sidebar ul li a:hover {
+            color: #2980b9;
+        }
+
+        .main-content {
+            width: 75%;
+            margin-left: 5%;
+        }
+
+        .header {
+            background-image: url('static/images/green.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .start-btn {
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+
+        .start-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .content {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none; /* Hide content by default */
+        }
+
+        .content h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .content p {
+            font-size: 1.1em;
+            color: #777;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .content .stat {
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        .quiz {
+            margin-top: 20px;
+        }
+
+        .quiz-question {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .quiz-option {
+            display: block;
+            margin: 5px 0;
+        }
+
+        .quiz-option input {
+            margin-right: 10px;
+        }
+
+        .quiz-btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .quiz-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .quiz-answer {
+            display: none; /* Hide answers by default */
+            margin-top: 10px;
+            color: #e74c3c;
+        }
+
+        .active {
+            display: block; /* Show content when active */
+        }
+    </style>
+    <script>
+        // Function to show the selected content and hide others
+        function showContent(id) {
+            const contents = document.querySelectorAll('.content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(id).classList.add('active');
+        }
+
+        // Function to show quiz answers
+        function showAnswer(answerId) {
+            const answers = document.querySelectorAll('.quiz-answer');
+            answers.forEach(answer => {
+                answer.style.display = 'none';
+            });
+            document.getElementById(answerId).style.display = 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h2>Course Lessons</h2>
+            <ul>
+                <li><a href="javascript:void(0);" onclick="showContent('introduction')">Introduction</a></li>
+                <li><a href="javascript:void(0);" onclick="showContent('impact')">Understanding Your Impact</a></li>
+                <li><a href="javascript:void(0);" onclick="showContent('energy-tips')">Energy Conservation Tips</a></li>
+                <li><a href="javascript:void(0);" onclick="showContent('transportation')">Sustainable Transportation</a></li>
+                <li><a href="javascript:void(0);" onclick="showContent('waste-reduction')">Waste Reduction Strategies</a></li>
+                <li><a href="javascript:void(0);" onclick="showContent('water-conservation')">Water Conservation</a></li>
+                <li><a href="javascript:void(0);" onclick="showContent('sustainable-shopping')">Sustainable Shopping Habits</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>Sustainable Living: Minimizing Your Environmental Impact</h1>
+                <p>Learn practical ways to reduce your carbon footprint and live more sustainably.</p>
+                <button class="start-btn" onclick="showContent('introduction')">Get Started for Free</button>
+                <button class="start-btn" onclick="window.location.href='dashboard'">Home</button>
+
+            </div>
+
+            <div class="content" id="introduction">
+                <h2>Introduction</h2>
+                <p>Sustainable living is about making choices that reduce your environmental impact and contribute to a healthier planet. This course covers key aspects such as energy conservation, waste reduction, and water conservation, helping you adopt sustainable habits in your daily life.</p>
+                <p>Over the next few lessons, you will gain insights into how your daily activities affect the environment and learn practical steps to minimize that impact.</p>
+                <div class="quiz">
+                    <div class="quiz-question">What is sustainable living?</div>
+                    <label class="quiz-option"><input type="radio" name="q1" value="a"> Making choices that have no environmental impact.</label>
+                    <label class="quiz-option"><input type="radio" name="q1" value="b"> Making choices that reduce environmental impact.</label>
+                    <label class="quiz-option"><input type="radio" name="q1" value="c"> Ignoring environmental issues.</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer1')">Check Answer</button>
+                    <div class="quiz-answer" id="answer1">Correct! Sustainable living means making choices that reduce your environmental impact.</div>
+                </div>
+            </div>
+            
+            <div class="content" id="impact">
+                <h2>Understanding Your Impact</h2>
+                <p>Every action we take—from the food we eat to the way we travel—has an environmental cost. Understanding your personal carbon footprint is the first step toward reducing it. For example, the average American contributes to a carbon footprint of approximately 16 tons per year. By making conscious choices, you can significantly reduce this number.</p>
+                <p>Here are some key statistics to consider:</p>
+                <ul>
+                    <li>Transportation accounts for about 29% of total greenhouse gas emissions.</li>
+                    <li>Food production contributes roughly 20% of global emissions, with beef being the most carbon-intensive food.</li>
+                </ul>
+                <p class="stat">By switching to a plant-based diet, you can reduce your carbon footprint by up to 50%.</p>
+                <div class="quiz">
+                    <div class="quiz-question">Which activity contributes most to greenhouse gas emissions?</div>
+                    <label class="quiz-option"><input type="radio" name="q2" value="a"> Transportation</label>
+                    <label class="quiz-option"><input type="radio" name="q2" value="b"> Recycling</label>
+                    <label class="quiz-option"><input type="radio" name="q2" value="c"> Walking</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer2')">Check Answer</button>
+                    <div class="quiz-answer" id="answer2">Correct! Transportation accounts for about 29% of total greenhouse gas emissions.</div>
+                </div>
+            </div>
+
+            <div class="content" id="energy-tips">
+                <h2>Energy Conservation Tips</h2>
+                <p>Reducing energy consumption is crucial for minimizing your carbon footprint. Simple changes in your home can lead to significant savings.</p>
+                <p>Here are some energy-saving tips:</p>
+                <ul>
+                    <li>Switch to LED bulbs, which use up to 75% less energy than incandescent bulbs.</li>
+                    <li>Unplug electronics when not in use to avoid phantom energy loss.</li>
+                    <li>Use energy-efficient appliances and check for the ENERGY STAR label.</li>
+                </ul>
+                <p class="stat">By implementing energy-saving measures, you can reduce your electricity bill by 10-30% annually.</p>
+                <div class="quiz">
+                    <div class="quiz-question">What is one way to reduce energy consumption?</div>
+                    <label class="quiz-option"><input type="radio" name="q3" value="a"> Keeping all appliances plugged in.</label>
+                    <label class="quiz-option"><input type="radio" name="q3" value="b"> Switching to LED bulbs.</label>
+                    <label class="quiz-option"><input type="radio" name="q3" value="c"> Using more incandescent bulbs.</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer3')">Check Answer</button>
+                    <div class="quiz-answer" id="answer3">Correct! Switching to LED bulbs is an effective way to reduce energy consumption.</div>
+                </div>
+            </div>
+
+            <div class="content" id="transportation">
+                <h2>Sustainable Transportation</h2>
+                <p>Transportation is a significant contributor to greenhouse gas emissions. Here are some ways to make your travel more sustainable:</p>
+                <ul>
+                    <li>Opt for public transportation, which can reduce your carbon footprint by up to 45% per mile compared to driving.</li>
+                    <li>Carpool with others to decrease the number of vehicles on the road.</li>
+                    <li>Choose walking or biking for short distances to cut down on emissions.</li>
+                </ul>
+                <p class="stat">Switching to public transport can save about 1.5 billion gallons of gasoline annually.</p>
+                <div class="quiz">
+                    <div class="quiz-question">How can you reduce your transportation carbon footprint?</div>
+                    <label class="quiz-option"><input type="radio" name="q4" value="a"> By driving alone.</label>
+                    <label class="quiz-option"><input type="radio" name="q4" value="b"> By using public transportation.</label>
+                    <label class="quiz-option"><input type="radio" name="q4" value="c"> By flying more.</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer4')">Check Answer</button>
+                    <div class="quiz-answer" id="answer4">Correct! Using public transportation can significantly reduce your carbon footprint.</div>
+                </div>
+            </div>
+
+            <div class="content" id="waste-reduction">
+                <h2>Waste Reduction Strategies</h2>
+                <p>Reducing waste is essential for a sustainable lifestyle. Implementing the 3 Rs—Reduce, Reuse, Recycle—can make a significant difference.</p>
+                <p>Consider these strategies:</p>
+                <ul>
+                    <li>Reduce single-use plastics by carrying a reusable water bottle and bags.</li>
+                    <li>Repurpose items whenever possible instead of discarding them.</li>
+                    <li>Participate in local recycling programs to ensure proper waste management.</li>
+                </ul>
+                <p class="stat">Each person can save up to 1,200 pounds of waste per year by recycling and composting.</p>
+                <div class="quiz">
+                    <div class="quiz-question">What does the 3 Rs stand for?</div>
+                    <label class="quiz-option"><input type="radio" name="q5" value="a"> Read, React, Reduce</label>
+                    <label class="quiz-option"><input type="radio" name="q5" value="b"> Reduce, Reuse, Recycle</label>
+                    <label class="quiz-option"><input type="radio" name="q5" value="c"> Refuse, Recycle, Replace</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer5')">Check Answer</button>
+                    <div class="quiz-answer" id="answer5">Correct! The 3 Rs stand for Reduce, Reuse, Recycle.</div>
+                </div>
+            </div>
+
+            <div class="content" id="water-conservation">
+                <h2>Water Conservation</h2>
+                <p>Water is a precious resource that is often taken for granted. Simple practices can greatly reduce water usage in your home and garden.</p>
+                <p>Effective water conservation strategies include:</p>
+                <ul>
+                    <li>Fixing leaks promptly, which can waste gallons of water daily.</li>
+                    <li>Installing low-flow fixtures in your bathroom and kitchen.</li>
+                    <li>Using rain barrels to collect water for gardening and outdoor use.</li>
+                </ul>
+                <p class="stat">The average American household uses about 300 gallons of water per day; simple changes can reduce this significantly.</p>
+                <div class="quiz">
+                    <div class="quiz-question">What is one effective strategy for water conservation?</div>
+                    <label class="quiz-option"><input type="radio" name="q6" value="a"> Ignoring leaks.</label>
+                    <label class="quiz-option"><input type="radio" name="q6" value="b"> Installing low-flow fixtures.</label>
+                    <label class="quiz-option"><input type="radio" name="q6" value="c"> Watering plants during the hottest part of the day.</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer6')">Check Answer</button>
+                    <div class="quiz-answer" id="answer6">Correct! Installing low-flow fixtures is an effective strategy for water conservation.</div>
+                </div>
+            </div>
+
+            <div class="content" id="sustainable-shopping">
+                <h2>Sustainable Shopping Habits</h2>
+                <p>Being mindful of what you purchase can lead to more sustainable consumption. Opt for eco-friendly products and support companies that prioritize sustainability.</p>
+                <p>Consider the following when shopping:</p>
+                <ul>
+                    <li>Choose local and seasonal products to minimize transportation emissions.</li>
+                    <li>Research brands to find those committed to sustainable practices and ethical sourcing.</li>
+                    <li>Invest in high-quality products that will last longer, reducing waste over time.</li>
+                </ul>
+                <p class="stat">Shopping locally can reduce greenhouse gas emissions by up to 10% compared to buying imported goods.</p>
+                <div class="quiz">
+                    <div class="quiz-question">What is one benefit of shopping locally?</div>
+                    <label class="quiz-option"><input type="radio" name="q7" value="a"> It increases transportation emissions.</label>
+                    <label class="quiz-option"><input type="radio" name="q7" value="b"> It supports local economies.</label>
+                    <label class="quiz-option"><input type="radio" name="q7" value="c"> It leads to more waste.</label>
+                    <button class="quiz-btn" onclick="showAnswer('answer7')">Check Answer</button>
+                    <div class="quiz-answer" id="answer7">Correct! Shopping locally supports local economies and reduces transportation emissions.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
